@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
 import { auth } from '@clerk/nextjs/server'
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,25 +11,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user data
-    const { data: user, error } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    const rows = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1)
+    const user = rows[0] || null
 
-    if (error) {
-      console.error('Error fetching user:', error)
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    return NextResponse.json(user)
+    return NextResponse.json({ user })
   } catch (error) {
-    console.error('Error in user GET route:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('GET /api/user error', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
@@ -38,47 +28,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { email, full_name } = await request.json()
+    const body = await request.json()
+    const { email, firstName, lastName } = body
 
-    // Check if user already exists
-    const { data: existingUser } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('id', userId)
-      .single()
-
-    if (existingUser) {
-      return NextResponse.json({ message: 'User already exists' })
+    const existing = await db.select({ id: users.id }).from(users).where(eq(users.clerkId, userId)).limit(1)
+    if (existing.length > 0) {
+      return NextResponse.json({ ok: true })
     }
 
-    // Create new user
-    const { data: user, error } = await supabaseAdmin
-      .from('users')
-      .insert({
-        id: userId,
-        email: email,
-        full_name: full_name,
-        tier: 'free',
-        query_count: 0,
-        query_limit: 10,
-      })
-      .select()
-      .single()
+    await db.insert(users).values({
+      clerkId: userId,
+      email,
+      firstName,
+      lastName,
+      tier: 'free',
+      queryCount: 0,
+      queryLimit: 10,
+    })
 
-    if (error) {
-      console.error('Error creating user:', error)
-      return NextResponse.json(
-        { error: 'Failed to create user' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(user)
+    return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error('Error in user POST route:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('POST /api/user error', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 } 
