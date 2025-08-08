@@ -7,14 +7,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "drizzle:generate": "drizzle-kit generate:pg",
+    "drizzle:migrate": "drizzle-kit push:pg"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.0",
+    "@neondatabase/serverless": "^0.9.4",
     "@stripe/react-stripe-js": "^2.1.0",
     "@stripe/stripe-js": "^2.4.0",
     "@supabase/supabase-js": "^2.38.0",
     "clsx": "^2.0.0",
+    "drizzle-orm": "^0.32.2",
     "lucide-react": "^0.292.0",
     "next": "^14.2.25",
     "react": "^18.2.0",
@@ -30,6 +34,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.16",
+    "drizzle-kit": "^0.24.0",
     "eslint": "^8.51.0",
     "eslint-config-next": "^14.2.25",
     "postcss": "^8.4.31",

@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-// import { ClerkProvider } from '@clerk/nextjs'
+import dynamic from 'next/dynamic'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
 import NavBar from '@/components/NavBar'
+
+const ClientClerkProvider = dynamic(() => import('@/components/ClientClerkProvider'), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Pocket Bookkeeper - Best bookkeeping app for small business',
@@ -58,18 +60,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <NavBar />
-        {children}
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#ffffff',
-              color: '#1f2937',
-            },
-          }}
-        />
+        <ClientClerkProvider>
+          <NavBar />
+          {children}
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#ffffff',
+                color: '#1f2937',
+              },
+            }}
+          />
+        </ClientClerkProvider>
       </body>
     </html>
   )
