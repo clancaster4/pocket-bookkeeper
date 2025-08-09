@@ -234,7 +234,12 @@ export default function Home() {
   // Show sign-in page if not authenticated
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-accent-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-accent-50 flex items-center justify-center p-4 relative">
+        {/* Fire emoji in top right */}
+        <div className="absolute top-4 right-4 text-4xl">
+          🔥
+        </div>
+        
         <div className="text-center max-w-md">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-neutral-900 mb-4">Pocket Bookkeeper</h1>
