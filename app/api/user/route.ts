@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { db, users } from '@/lib/db'
 import { auth } from '@clerk/nextjs/server'
+import { eq } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,14 +11,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user data
-    const { data: user, error } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    const user = await db.query.users.findFirst({
+      where: eq(users.clerkId, userId),
+    })
 
-    if (error) {
-      console.error('Error fetching user:', error)
+    if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
@@ -38,42 +36,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { email, full_name } = await request.json()
+    const { email, firstName, lastName } = await request.json()
 
     // Check if user already exists
-    const { data: existingUser } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('id', userId)
-      .single()
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.clerkId, userId),
+    })
 
     if (existingUser) {
-      return NextResponse.json({ message: 'User already exists' })
+      return NextResponse.json({ message: 'User already exists', user: existingUser })
     }
 
     // Create new user
-    const { data: user, error } = await supabaseAdmin
-      .from('users')
-      .insert({
-        id: userId,
-        email: email,
-        full_name: full_name,
-        tier: 'free',
-        query_count: 0,
-        query_limit: 10,
-      })
-      .select()
-      .single()
+    const [newUser] = await db.insert(users).values({
+      clerkId: userId,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      tier: 'free',
+      queryCount: 0,
+      queryLimit: 10,
+    }).returning()
 
-    if (error) {
-      console.error('Error creating user:', error)
-      return NextResponse.json(
-        { error: 'Failed to create user' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(user)
+    return NextResponse.json(newUser)
   } catch (error) {
     console.error('Error in user POST route:', error)
     return NextResponse.json(

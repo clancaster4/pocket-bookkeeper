@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Calculator, User, LogIn } from 'lucide-react'
-// import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
+import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
 import SubscriptionModal from './SubscriptionModal'
 import { useAppStore } from '@/lib/store'
 
@@ -13,9 +13,7 @@ interface HeaderProps {
 export default function Header({ onSubscriptionModalChange }: HeaderProps) {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const { usage, subscription } = useAppStore()
-  // const { user, isSignedIn } = useUser()
-  const user: any = null
-  const isSignedIn = false // Set to false to show sign-in button
+  const { user, isSignedIn } = useUser()
 
   const handleCloseModal = () => {
     setShowSubscriptionModal(false)
@@ -56,39 +54,22 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
               <div className="text-sm text-neutral-600">
                 Welcome, {user?.firstName || user?.emailAddresses?.[0]?.emailAddress || 'User'}
               </div>
-              <button
-                onClick={() => {
-                  // Handle sign out or user menu
-                  console.log('User menu clicked')
-                }}
-                className="w-8 h-8 rounded-full border-2 border-white shadow-md bg-gradient-to-r from-secondary-500 to-secondary-600 flex items-center justify-center hover:from-secondary-600 hover:to-secondary-700 transition-all duration-200"
-              >
-                <User className="w-4 h-4 text-white" />
-              </button>
+              <UserButton />
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <button
-                onClick={() => {
-                  // Navigate to sign-in page
-                  window.location.href = '/sign-in'
-                }}
-                className="inline-flex items-center space-x-2 px-3 py-2 bg-white/90 hover:bg-white text-neutral-700 font-medium rounded-full transition-all duration-200 shadow-lg shadow-neutral-200/50 backdrop-blur-sm border border-neutral-200 hover:shadow-xl hover:shadow-neutral-300/50 transform hover:scale-105"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Sign In</span>
-              </button>
-                             <button
-                 onClick={() => {
-                   // Open subscription modal for sign up
-                   setShowSubscriptionModal(true)
-                   onSubscriptionModalChange?.(true)
-                 }}
-                 className="inline-flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white font-medium rounded-full transition-all duration-200 shadow-lg shadow-secondary-500/25 hover:shadow-xl hover:shadow-secondary-500/30 transform hover:scale-105"
-               >
-                 <User className="w-4 h-4" />
-                 <span>Sign Up</span>
-               </button>
+              <SignInButton mode="modal">
+                <button className="inline-flex items-center space-x-2 px-3 py-2 bg-white/90 hover:bg-white text-neutral-700 font-medium rounded-full transition-all duration-200 shadow-lg shadow-neutral-200/50 backdrop-blur-sm border border-neutral-200 hover:shadow-xl hover:shadow-neutral-300/50 transform hover:scale-105">
+                  <LogIn className="w-4 h-4" />
+                  <span>Sign In</span>
+                </button>
+              </SignInButton>
+              <SignInButton mode="modal" afterSignUpUrl="/">
+                <button className="inline-flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white font-medium rounded-full transition-all duration-200 shadow-lg shadow-secondary-500/25 hover:shadow-xl hover:shadow-secondary-500/30 transform hover:scale-105">
+                  <User className="w-4 h-4" />
+                  <span>Sign Up</span>
+                </button>
+              </SignInButton>
             </div>
           )}
         </div>

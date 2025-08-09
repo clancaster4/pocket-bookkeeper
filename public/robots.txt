@@ -1,0 +1,26 @@
+# Robots.txt for Pocket Bookkeeper
+# https://pocketbookkeeper.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Important pages for crawling
+Allow: /about
+Allow: /support  
+Allow: /popular-uses
+
+# Block API routes from indexing
+Disallow: /api/
+
+# Block auth pages from indexing
+Disallow: /sign-in/
+Disallow: /sign-up/
+
+# Block subscription pages from direct indexing
+Disallow: /subscription/
+
+# Sitemap location
+Sitemap: https://pocketbookkeeper.com/sitemap.xml
+
+# Crawl delay for polite crawling
+Crawl-delay: 1

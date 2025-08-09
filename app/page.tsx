@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Menu, Calculator, BookOpen, DollarSign, MessageCircle, Copy, CheckCircle, XCircle } from 'lucide-react'
-// import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
+import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
 import Header from '@/components/Header'
 import ChatInterface from '@/components/ChatInterface'
 import ConversationSidebar from '@/components/ConversationSidebar'
@@ -13,11 +13,7 @@ import { useAppStore } from '@/lib/store'
 import { Message, FileAttachment } from '@/types/chat'
 
 export default function Home() {
-  // Temporarily disable Clerk authentication
-  // const { isSignedIn, user, isLoaded: clerkLoaded } = useUser()
-  const isSignedIn = true // Assume user is signed in for testing
-  const user = null
-  const clerkLoaded = true
+  const { isSignedIn, user, isLoaded: clerkLoaded } = useUser()
   
   const {
     currentConversation,
@@ -102,11 +98,10 @@ export default function Home() {
   }, [conversationsLoaded, conversationSummaries.length, createConversation])
 
   const handleSendMessage = async (message: string, attachments?: FileAttachment[]) => {
-    // Temporarily disable authentication check for testing
-    // if (!isSignedIn) {
-    //   alert('Please sign in to use the chat feature.')
-    //   return
-    // }
+    if (!isSignedIn) {
+      alert('Please sign in to use the chat feature.')
+      return
+    }
 
     // Check if we have a valid conversation, create one if needed
     if (!currentConversationId || !currentConversation) {
@@ -224,69 +219,68 @@ export default function Home() {
     }
   }
 
-  // Temporarily disable authentication for testing
   // Show loading state while Clerk is loading
-  // if (!clerkLoaded) {
-  //   return (
-  //     <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-  //         <p className="text-neutral-600">Loading...</p>
-  //       </div>
-  //     </div>
-  //   )
-  // }
+  if (!clerkLoaded) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Show sign-in page if not authenticated
-  // if (!isSignedIn) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-accent-50 flex items-center justify-center p-4">
-  //       <div className="text-center max-w-md">
-  //         <div className="mb-8">
-  //           <h1 className="text-4xl font-bold text-neutral-900 mb-4">Pocket Bookkeeper</h1>
-  //           <p className="text-xl text-neutral-600 mb-8">
-  //             Your AI-powered bookkeeping assistant for small business financial management
-  //           </p>
-  //         </div>
-  //         
-  //         <div className="space-y-4">
-  //           <SignInButton mode="modal">
-  //             <button className="w-full bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-3 px-6 rounded-xl transition-colors">
-  //               Sign In
-  //             </button>
-  //           </SignInButton>
-  //           
-  //           <p className="text-neutral-500">
-  //             Don't have an account?{' '}
-  //             <SignInButton mode="modal" afterSignUpUrl="/">
-  //               <span className="text-secondary-600 hover:text-secondary-700 font-medium cursor-pointer">
-  //                 Create one here
-  //               </span>
-  //             </SignInButton>
-  //           </p>
-  //         </div>
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-accent-50 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-neutral-900 mb-4">Pocket Bookkeeper</h1>
+            <p className="text-xl text-neutral-600 mb-8">
+              Your AI-powered bookkeeping assistant for small business financial management
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            <SignInButton mode="modal">
+              <button className="w-full bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-3 px-6 rounded-xl transition-colors">
+                Sign In
+              </button>
+            </SignInButton>
+            
+            <p className="text-neutral-500">
+              Don't have an account?{' '}
+              <SignInButton mode="modal" afterSignUpUrl="/">
+                <span className="text-secondary-600 hover:text-secondary-700 font-medium cursor-pointer">
+                  Create one here
+                </span>
+              </SignInButton>
+            </p>
+          </div>
 
-  //         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-  //           <div className="text-center p-4">
-  //             <Calculator className="w-8 h-8 text-secondary-600 mx-auto mb-2" />
-  //             <h3 className="font-semibold text-neutral-900">Smart Bookkeeping</h3>
-  //             <p className="text-sm text-neutral-600">AI-powered guidance for all your financial tasks</p>
-  //           </div>
-  //           <div className="text-center p-4">
-  //             <BookOpen className="w-8 h-8 text-accent-600 mx-auto mb-2" />
-  //             <h3 className="font-semibold text-neutral-900">Expert Knowledge</h3>
-  //             <p className="text-sm text-neutral-600">Professional bookkeeping and tax advice</p>
-  //           </div>
-  //           <div className="text-center p-4">
-  //             <DollarSign className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-  //             <h3 className="font-semibold text-neutral-900">Save Money</h3>
-  //             <p className="text-sm text-neutral-600">Reduce accounting costs and time</p>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   )
-  // }
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-4">
+              <Calculator className="w-8 h-8 text-secondary-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-neutral-900">Smart Bookkeeping</h3>
+              <p className="text-sm text-neutral-600">AI-powered guidance for all your financial tasks</p>
+            </div>
+            <div className="text-center p-4">
+              <BookOpen className="w-8 h-8 text-accent-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-neutral-900">Expert Knowledge</h3>
+              <p className="text-sm text-neutral-600">Professional bookkeeping and tax advice</p>
+            </div>
+            <div className="text-center p-4">
+              <DollarSign className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-neutral-900">Save Money</h3>
+              <p className="text-sm text-neutral-600">Reduce accounting costs and time</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // Debug current state
   console.log('Current app state:', {
