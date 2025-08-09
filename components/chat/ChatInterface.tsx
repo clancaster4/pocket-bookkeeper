@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react'
 import { Send, Paperclip, X, FileText, Image, File, ChevronDown, Crown, BookOpen, Sparkles, Minimize2, Maximize2 } from 'lucide-react'
 import ChatMessage from './ChatMessage'
-import FileUpload from './FileUpload'
-import SubscriptionModal from './SubscriptionModal'
-import { useAppStore } from '@/lib/store'
+import { FileUpload } from '@/components/ui'
+import { SubscriptionModal } from '@/components/subscription'
+import { useAppStore, useSubscription } from '@/lib/store'
 import { Message, FileAttachment } from '@/types/chat'
+import { AI_MODELS } from '@/constants/app'
 
 interface AIModel {
   id: string
@@ -41,7 +42,7 @@ export default function ChatInterface({
   const [isMinimized, setIsMinimized] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const { subscription } = useAppStore()
+  const subscription = useSubscription()
 
   // Update local state when prop changes
   useEffect(() => {

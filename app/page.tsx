@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react'
 import { Menu, Calculator, BookOpen, DollarSign, MessageCircle, Copy, CheckCircle, XCircle } from 'lucide-react'
 // import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
-import Header from '@/components/Header'
-import ChatInterface from '@/components/ChatInterface'
-import ConversationSidebar from '@/components/ConversationSidebar'
-import Disclaimer from '@/components/Disclaimer'
+import { Header, ConversationSidebar } from '@/components/layout'
+import { ChatInterface } from '@/components/chat'
+import { Disclaimer } from '@/components/ui'
 import { useConversations } from '@/hooks/useConversations'
 import { useUser as useAppUser } from '@/hooks/useUser'
+import { useChat } from '@/hooks/useChat'
 import { useAppStore } from '@/lib/store'
 import { Message, FileAttachment } from '@/types/chat'
+import { DEFAULTS, PLAN_NAMES } from '@/constants/app'
+import { FullPageLoader } from '@/components/ui'
 
 export default function Home() {
   // Temporarily disable Clerk authentication
@@ -33,10 +35,16 @@ export default function Home() {
   // Initialize user data and fetch server-side usage
   useAppUser()
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false) // Start collapsed by default
+  // Use the custom chat hook
+  const {
+    isLoading,
+    selectedAIModel,
+    handleSendMessage: sendMessage,
+    handleAIModelChange,
+  } = useChat()
+
+  const [sidebarOpen, setSidebarOpen] = useState(DEFAULTS.SIDEBAR_COLLAPSED)
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false)
-  const [selectedAIModel, setSelectedAIModel] = useState('everyday')
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [showCancelMessage, setShowCancelMessage] = useState(false)
   const [successPlan, setSuccessPlan] = useState('')
@@ -102,97 +110,11 @@ export default function Home() {
   }, [conversationsLoaded, conversationSummaries.length, createConversation])
 
   const handleSendMessage = async (message: string, attachments?: FileAttachment[]) => {
-    // Temporarily disable authentication check for testing
-    // if (!isSignedIn) {
-    //   alert('Please sign in to use the chat feature.')
-    //   return
-    // }
-
-    // Check if we have a valid conversation, create one if needed
-    if (!currentConversationId || !currentConversation) {
-      console.log('No current conversation, creating one...')
-      try {
-        const newConversationId = createConversation()
-        console.log('Created new conversation with ID:', newConversationId)
-      } catch (error) {
-        console.error('Error creating conversation:', error)
-        alert('Failed to create conversation. Please refresh the page and try again.')
-        return
-      }
-    }
-
-    console.log('Sending message:', message)
-    console.log('Current conversation ID:', currentConversationId)
-    console.log('Current conversation:', currentConversation)
-
-    setIsLoading(true)
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message,
-          history: currentConversation?.messages.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-          })) || [],
-          attachments,
-          aiModel: selectedAIModel,
-        }),
-      })
-
-      console.log('API response status:', response.status)
-
-      const data = await response.json()
-      console.log('API response data:', data)
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          // Handle rate limiting
-          const errorMessage = data.details?.message || 'You have exceeded your query limit. Please upgrade to continue.'
-          alert(errorMessage)
-          return
-        }
-        throw new Error(data.error || 'Failed to send message')
-      }
-
-      // Add user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: message,
-        timestamp: new Date(),
-        attachments,
-      }
-
-      // Add AI response
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date(),
-        modelUsed: data.modelUsed,
-      }
-
-      console.log('Adding user message:', userMessage)
-      console.log('Adding AI message:', aiMessage)
-
-      // Get the current conversation ID (should be set by now)
-      const conversationId = currentConversationId || createConversation()
-      
-      // Add messages to conversation
-      await addMessageToConversation(conversationId, userMessage)
-      await addMessageToConversation(conversationId, aiMessage)
-
-      console.log('Messages added successfully')
-
+      await sendMessage(message, attachments)
     } catch (error) {
       console.error('Error sending message:', error)
-      alert('Failed to send message. Please try again.')
-    } finally {
-      setIsLoading(false)
+      alert(error instanceof Error ? error.message : 'Failed to send message. Please try again.')
     }
   }
 
@@ -212,29 +134,14 @@ export default function Home() {
     setSubscriptionModalOpen(isOpen)
   }
 
-  const handleAIModelChange = (modelId: string) => {
-    setSelectedAIModel(modelId)
-  }
-
   const getPlanName = (planId: string): string => {
-    switch (planId) {
-      case 'basic-helper': return 'Everyday Assistant'
-      case 'elite-advisor': return 'Elite Advisor'
-      default: return 'Unknown Plan'
-    }
+    return PLAN_NAMES[planId] || 'Unknown Plan'
   }
 
   // Temporarily disable authentication for testing
   // Show loading state while Clerk is loading
   // if (!clerkLoaded) {
-  //   return (
-  //     <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-  //         <p className="text-neutral-600">Loading...</p>
-  //       </div>
-  //     </div>
-  //   )
+  //   return <FullPageLoader message="Loading application..." />
   // }
 
   // Show sign-in page if not authenticated
@@ -299,14 +206,7 @@ export default function Home() {
 
   // Show loading state while conversations are loading
   if (!conversationsLoaded) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading your conversations...</p>
-        </div>
-      </div>
-    )
+    return <FullPageLoader message="Loading your conversations..." />
   }
 
   return (
