@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'react-hot-toast'
+import HamburgerMenu from '@/components/HamburgerMenu'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className="antialiased">
+          <HamburgerMenu />
           {children}
           <Toaster 
             position="top-right"
