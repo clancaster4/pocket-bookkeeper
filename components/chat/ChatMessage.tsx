@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { User, FileText, Image, File, Download, ExternalLink, Calculator } from 'lucide-react'
 import { Message } from '@/types/chat'
+import { formatFileSize as formatBytes } from '@/utils/format'
 
 interface ChatMessageProps {
   message: Message
   selectedAIModel?: string
 }
 
-export default function ChatMessage({ message, selectedAIModel = 'everyday' }: ChatMessageProps) {
+const ChatMessage = memo(function ChatMessage({ message, selectedAIModel = 'everyday' }: ChatMessageProps) {
   const [isImageExpanded, setIsImageExpanded] = useState(false)
 
 
@@ -24,13 +25,7 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
     }
   }
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+
 
   const handleFileClick = (attachment: any) => {
     if (attachment.url) {
@@ -117,7 +112,7 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
                         {attachment.name}
                       </p>
                       <p className="text-xs text-neutral-500">
-                        {formatFileSize(attachment.size)}
+                        {formatBytes(attachment.size)}
                       </p>
                     </div>
                     {(attachment.url || attachment.preview) && (
@@ -145,4 +140,6 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
       </div>
     </div>
   )
-} 
+})
+
+export default ChatMessage 
