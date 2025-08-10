@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, X, Crown, Zap, Star, Sparkles } from 'lucide-react'
 import { loadStripe } from '@stripe/stripe-js'
+import { useUser, useClerk } from '@clerk/nextjs'
 
 interface SubscriptionModalProps {
   isOpen: boolean
@@ -15,9 +16,22 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [selectedPlan, setSelectedPlan] = useState('basic-helper')
   const [isLoading, setIsLoading] = useState(false)
+  const { isSignedIn } = useUser()
+  const { openSignUp } = useClerk()
 
   const handleSubscribe = async () => {
     if (selectedPlan === 'free') return
+
+    // Check if user is authenticated
+    if (!isSignedIn) {
+      // Close the modal and open sign-up
+      onClose()
+      openSignUp({
+        afterSignUpUrl: `/?openSubscription=true&selectedPlan=${selectedPlan}`,
+        afterSignInUrl: `/?openSubscription=true&selectedPlan=${selectedPlan}`,
+      })
+      return
+    }
 
     setIsLoading(true)
     try {

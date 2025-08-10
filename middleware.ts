@@ -10,6 +10,8 @@ export default authMiddleware({
     "/sign-in(.*)",
     "/sign-up(.*)",
     "/api/webhook(.*)",
+    "/api/chat",  // Allow unauthenticated access to chat API
+    "/api/create-checkout-session",  // Allow checkout session creation (will redirect to auth if needed)
   ],
   // Routes that can always be accessed, and have
   // no authentication information

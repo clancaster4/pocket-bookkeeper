@@ -45,6 +45,7 @@ export default function Home() {
       const canceled = urlParams.get('canceled')
       const plan = urlParams.get('plan')
       const openSubscription = urlParams.get('openSubscription')
+      const selectedPlan = urlParams.get('selectedPlan')
 
       if (success === 'true' && plan) {
         setShowSuccessMessage(true)
@@ -69,7 +70,11 @@ export default function Home() {
           setShowCancelMessage(false)
         }, 5000)
       } else if (openSubscription === 'true') {
-        // Open subscription modal and clear URL parameter
+        // Open subscription modal with pre-selected plan if provided
+        if (selectedPlan) {
+          // We'll need to pass this to the modal somehow
+          // For now, just open the modal
+        }
         setSubscriptionModalOpen(true)
         const newUrl = window.location.pathname
         window.history.replaceState({}, '', newUrl)
@@ -231,61 +236,8 @@ export default function Home() {
     )
   }
 
-  // Show sign-in page if not authenticated
-  if (!isSignedIn) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary-50 to-accent-50 flex items-center justify-center p-4 relative">
-        {/* Fire emoji in top right */}
-        <div className="absolute top-4 right-4 text-4xl">
-          🔥
-        </div>
-        
-        <div className="text-center max-w-md">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-neutral-900 mb-4">Pocket Bookkeeper</h1>
-            <p className="text-xl text-neutral-600 mb-8">
-              Your AI-powered bookkeeping assistant for small business financial management
-            </p>
-          </div>
-          
-          <div className="space-y-4">
-            <SignInButton mode="modal">
-              <button className="w-full bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-3 px-6 rounded-xl transition-colors">
-                Sign In
-              </button>
-            </SignInButton>
-            
-            <p className="text-neutral-500">
-              Don't have an account?{' '}
-              <SignInButton mode="modal" afterSignUpUrl="/">
-                <span className="text-secondary-600 hover:text-secondary-700 font-medium cursor-pointer">
-                  Create one here
-                </span>
-              </SignInButton>
-            </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4">
-              <Calculator className="w-8 h-8 text-secondary-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-neutral-900">Smart Bookkeeping</h3>
-              <p className="text-sm text-neutral-600">AI-powered guidance for all your financial tasks</p>
-            </div>
-            <div className="text-center p-4">
-              <BookOpen className="w-8 h-8 text-accent-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-neutral-900">Expert Knowledge</h3>
-              <p className="text-sm text-neutral-600">Professional bookkeeping and tax advice</p>
-            </div>
-            <div className="text-center p-4">
-              <DollarSign className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-neutral-900">Save Money</h3>
-              <p className="text-sm text-neutral-600">Reduce accounting costs and time</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Remove the sign-in page block - users can now use the chat without authentication
+  // The sign-in/sign-up buttons are available in the Header component
 
   // Debug current state
   console.log('Current app state:', {
@@ -293,7 +245,8 @@ export default function Home() {
     currentConversationId,
     currentConversation: currentConversation ? 'exists' : 'null',
     conversationSummariesLength: conversationSummaries.length,
-    isLoading
+    isLoading,
+    isSignedIn
   })
 
   // Show loading state while conversations are loading

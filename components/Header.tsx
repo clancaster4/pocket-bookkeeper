@@ -57,7 +57,10 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
               <UserButton />
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+              <div className="text-xs text-neutral-500 mr-2">
+                Try it free, then
+              </div>
               <SignInButton mode="modal">
                 <button className="inline-flex items-center space-x-2 px-3 py-2 bg-white/90 hover:bg-white text-neutral-700 font-medium rounded-full transition-all duration-200 shadow-lg shadow-neutral-200/50 backdrop-blur-sm border border-neutral-200 hover:shadow-xl hover:shadow-neutral-300/50 transform hover:scale-105">
                   <LogIn className="w-4 h-4" />
@@ -88,7 +91,9 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
             Your AI-powered bookkeeping assistant
           </p>
           <p className="text-sm sm:text-base text-neutral-500 mb-6">
-            Get expert guidance on expenses, taxes, and financial management
+            {isSignedIn 
+              ? 'Get expert guidance on expenses, taxes, and financial management'
+              : '🎉 Test it free! No sign-up required for your first 10 queries'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()}`}>
@@ -108,7 +113,7 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
                 }}
                 className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white text-sm font-medium rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
               >
-                Hire your Bookkeeper
+                {isSignedIn ? 'Hire your Bookkeeper' : 'Get Unlimited Queries'}
               </button>
             )}
           </div>

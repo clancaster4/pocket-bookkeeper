@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Paperclip, X, FileText, Image, File, ChevronDown, Crown, BookOpen, Sparkles, Minimize2, Maximize2 } from 'lucide-react'
+import { Send, Paperclip, X, FileText, Image, File, ChevronDown, Crown, BookOpen, Sparkles, Minimize2, Maximize2, MessageCircle, Calculator, DollarSign, TrendingUp } from 'lucide-react'
 import ChatMessage from './ChatMessage'
 import FileUpload from './FileUpload'
 import SubscriptionModal from './SubscriptionModal'
 import { useAppStore } from '@/lib/store'
 import { Message, FileAttachment } from '@/types/chat'
+import { useUser } from '@clerk/nextjs'
 
 interface AIModel {
   id: string
@@ -42,6 +43,7 @@ export default function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const { subscription } = useAppStore()
+  const { isSignedIn } = useUser()
 
   // Update local state when prop changes
   useEffect(() => {
@@ -214,6 +216,76 @@ export default function ChatInterface({
         )}
         
         <div ref={messagesEndRef} />
+      </div>
+    )}
+
+    {/* Welcome Message - Show when there are no messages */}
+    {messages.length === 0 && !isMinimized && (
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <MessageCircle className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+              Welcome to Pocket Bookkeeper!
+            </h2>
+            <p className="text-neutral-600">
+              {isSignedIn 
+                ? "I'm your AI bookkeeping assistant. How can I help you today?"
+                : "🎉 Try me free! You get 10 free queries to test my capabilities."}
+            </p>
+            {!isSignedIn && (
+              <p className="text-sm text-neutral-500 mt-2">
+                No sign-up required to start. Create an account when you're ready for unlimited access.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide">Try asking me about:</h3>
+            <div className="grid gap-3">
+              <button
+                onClick={() => setInputMessage("How do I categorize my business expenses for tax purposes?")}
+                className="text-left p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group"
+              >
+                <div className="flex items-start space-x-3">
+                  <Calculator className="w-5 h-5 text-secondary-600 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-medium text-neutral-900">Expense Categorization</p>
+                    <p className="text-sm text-neutral-600">How do I categorize my business expenses for tax purposes?</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setInputMessage("What tax deductions can I claim as a small business owner?")}
+                className="text-left p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group"
+              >
+                <div className="flex items-start space-x-3">
+                  <DollarSign className="w-5 h-5 text-accent-600 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-medium text-neutral-900">Tax Deductions</p>
+                    <p className="text-sm text-neutral-600">What tax deductions can I claim as a small business owner?</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setInputMessage("How should I track my business income and expenses?")}
+                className="text-left p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group"
+              >
+                <div className="flex items-start space-x-3">
+                  <TrendingUp className="w-5 h-5 text-neutral-600 mt-0.5 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-medium text-neutral-900">Financial Tracking</p>
+                    <p className="text-sm text-neutral-600">How should I track my business income and expenses?</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     )}
 
