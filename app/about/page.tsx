@@ -303,51 +303,6 @@ export default function AboutPage() {
         {/* How Small Business Owners Benefit Section */}
         <div className="py-16 sm:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
-                How Small Business Owners Benefit
-              </h2>
-              <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-                Real results from real business owners using Pocket Bookkeeper
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-8 mb-12">
-              {[
-                {
-                  name: 'Sarah Chen',
-                  business: 'E-commerce Store Owner',
-                  quote: 'I saved $7,200 in taxes my first year by properly tracking expenses I didn\'t know were deductible.',
-                  benefit: '$7,200 saved',
-                  image: '👩‍💼'
-                },
-                {
-                  name: 'Mike Rodriguez',
-                  business: 'Freelance Consultant',
-                  quote: 'Finally understand my cash flow. I can now predict slow months and plan accordingly.',
-                  benefit: '40% income stability',
-                  image: '👨‍💻'
-                },
-                {
-                  name: 'Jennifer Adams',
-                  business: 'Restaurant Owner',
-                  quote: 'Cut my bookkeeping time from 2 days to 2 hours per month. That\'s time back with my family.',
-                  benefit: '14 hours/month saved',
-                  image: '👩‍🍳'
-                }
-              ].map((testimonial, index) => (
-                <div key={index} className="bg-gradient-to-br from-secondary-50 to-accent-50 rounded-2xl p-6 border border-secondary-100">
-                  <div className="text-4xl mb-4">{testimonial.image}</div>
-                  <p className="text-neutral-700 italic mb-4">"{testimonial.quote}"</p>
-                  <div className="border-t border-secondary-200 pt-4">
-                    <p className="font-semibold text-neutral-900">{testimonial.name}</p>
-                    <p className="text-sm text-neutral-600">{testimonial.business}</p>
-                    <p className="text-sm font-bold text-secondary-600 mt-2">{testimonial.benefit}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-200">
               <h3 className="text-2xl font-bold text-neutral-900 mb-6 text-center">
                 Immediate Benefits You'll Experience
@@ -534,7 +489,7 @@ export default function AboutPage() {
                     Start Your Free Trial Today
                   </h3>
                   <p className="text-white/90 mb-4">
-                    No credit card required. Get 10 free queries to test how 
+                    No credit card required. Get 5 free messages to test how 
                     Pocket Bookkeeper fits into your workflow.
                   </p>
                   <Link

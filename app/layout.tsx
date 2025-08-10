@@ -4,6 +4,15 @@ import { Toaster } from 'react-hot-toast'
 import HamburgerMenu from '@/components/HamburgerMenu'
 import './globals.css'
 
+const localization = {
+  signUp: {
+    start: {
+      title: 'Create your account',
+      subtitle: 'to continue to Pocket Bookkeeper',
+    }
+  }
+}
+
 export const metadata: Metadata = {
   title: 'Pocket Bookkeeper - AI Bookkeeping Assistant',
   description: 'Get instant, accurate guidance on bookkeeping and accounting tasks. Your AI-powered assistant for small business financial management.',
@@ -23,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={localization}>
       <html lang="en">
         <body className="antialiased">
           <HamburgerMenu />

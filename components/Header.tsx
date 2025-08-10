@@ -23,11 +23,11 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
   // Determine what to display based on subscription status
   const getQueryDisplay = () => {
     if (subscription.tier === 'free') {
-      return `${usage.remainingQueries} queries remaining`
+      return `${usage.remainingQueries} messages remaining`
     } else if (subscription.tier === 'basic' || subscription.tier === 'elite') {
-      return 'Unlimited queries'
+      return 'Unlimited messages'
     } else {
-      return `${usage.remainingQueries} queries remaining`
+      return `${usage.remainingQueries} messages remaining`
     }
   }
 
@@ -58,19 +58,10 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-              <div className="text-xs text-neutral-500 mr-2">
-                Try it free, then
-              </div>
               <SignInButton mode="modal">
-                <button className="inline-flex items-center space-x-2 px-3 py-2 bg-white/90 hover:bg-white text-neutral-700 font-medium rounded-full transition-all duration-200 shadow-lg shadow-neutral-200/50 backdrop-blur-sm border border-neutral-200 hover:shadow-xl hover:shadow-neutral-300/50 transform hover:scale-105">
+                <button className="inline-flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white font-medium rounded-full transition-all duration-200 shadow-lg shadow-secondary-500/25 hover:shadow-xl hover:shadow-secondary-500/30 transform hover:scale-105">
                   <LogIn className="w-4 h-4" />
                   <span>Sign In</span>
-                </button>
-              </SignInButton>
-              <SignInButton mode="modal" afterSignUpUrl="/">
-                <button className="inline-flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white font-medium rounded-full transition-all duration-200 shadow-lg shadow-secondary-500/25 hover:shadow-xl hover:shadow-secondary-500/30 transform hover:scale-105">
-                  <User className="w-4 h-4" />
-                  <span>Sign Up</span>
                 </button>
               </SignInButton>
             </div>
@@ -88,12 +79,12 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
             Pocket Bookkeeper
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 mb-2">
-            Your AI-powered bookkeeping assistant
+            Your personal AI-powered bookkeeping assistant
           </p>
           <p className="text-sm sm:text-base text-neutral-500 mb-6">
             {isSignedIn 
               ? 'Get expert guidance on expenses, taxes, and financial management'
-              : '🎉 Test it free! No sign-up required for your first 10 queries'}
+              : 'Try it today! No sign-up required for your first 5 messages'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()}`}>
@@ -104,7 +95,7 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
               {getQueryDisplay()}
             </div>
             
-            {/* Show "Get Unlimited Queries" button only for free users */}
+            {/* Show "Go Unlimited" button only for free users */}
             {subscription.tier === 'free' && (
               <button
                 onClick={() => {
@@ -113,7 +104,7 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
                 }}
                 className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white text-sm font-medium rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
               >
-                {isSignedIn ? 'Hire your Bookkeeper' : 'Get Unlimited Queries'}
+                {isSignedIn ? 'Hire your Bookkeeper' : 'Go Unlimited'}
               </button>
             )}
           </div>

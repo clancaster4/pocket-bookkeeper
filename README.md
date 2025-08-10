@@ -7,8 +7,8 @@ An AI-powered bookkeeping chat advisor with a three-tier freemium subscription m
 Pocket Bookkeeper is a single-page web application that provides instant, accurate guidance on bookkeeping and accounting tasks. It features a three-tier model with different AI capabilities:
 
 - **Free Tier**: 10 queries per month with Standard AI model
-- **Everyday Assistant Tier**: $6.99/month with unlimited queries using Advanced AI
-- **Elite Advisor Tier**: $14.99/month with unlimited queries using Premium AI model
+- **Everyday Assistant Tier**: $9.99/month with unlimited queries using Advanced AI
+- **Elite Advisor Tier**: $19.99/month with unlimited queries using Premium AI model
 - **Payment Processing**: Stripe-powered subscriptions with email collection
 - **Usage Tracking**: Real-time query counting and limits
 
@@ -21,8 +21,8 @@ Pocket Bookkeeper is a single-page web application that provides instant, accura
 
 ### 💳 Three-Tier Subscription Management
 - **Free Tier**: 10 queries/month with Standard AI
-- **Everyday Assistant**: $6.99/month with unlimited access to Advanced AI
-- **Elite Advisor**: $14.99/month with unlimited access to Premium AI
+- **Everyday Assistant**: $9.99/month with unlimited access to Advanced AI
+- **Elite Advisor**: $19.99/month with unlimited access to Premium AI
 - **Stripe Integration**: Secure payment processing with email collection
 - **Webhook Handling**: Automatic subscription management
 
@@ -215,14 +215,14 @@ export const pricingPlans = [
   {
     id: 'basic-helper',
           name: 'Everyday Assistant',
-    price: 6.99,
+    price: 9.99,
     model: 'grok-3-mini',
     features: ['Unlimited queries', 'Grok-3-mini AI model', ...]
   },
   {
     id: 'elite-advisor',
     name: 'Elite Advisor',
-    price: 14.99,
+    price: 19.99,
     model: 'grok-4',
     features: ['Unlimited queries', 'Grok 4 AI model', ...]
   }

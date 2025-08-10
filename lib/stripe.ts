@@ -11,7 +11,7 @@ export const pricingPlans = [
     id: 'basic-helper',
     name: 'Everyday Assistant',
     priceId: process.env.NEXT_PUBLIC_BASIC_MONTHLY_PRICE_ID!,
-    price: 699, // $6.99 in cents (fallback)
+    price: 999, // $9.99 in cents (fallback)
     currency: 'usd',
     interval: 'month',
     model: 'advanced-ai',
@@ -27,7 +27,7 @@ export const pricingPlans = [
     id: 'elite-advisor',
     name: 'Elite Advisor',
     priceId: process.env.NEXT_PUBLIC_ELITE_MONTHLY_PRICE_ID!,
-    price: 1499, // $14.99 in cents (fallback)
+    price: 1999, // $19.99 in cents (fallback)
     currency: 'usd',
     interval: 'month',
     model: 'premium-ai',

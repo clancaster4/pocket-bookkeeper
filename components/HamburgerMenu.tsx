@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
@@ -17,16 +17,23 @@ import {
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu when route changes
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
-  // Prevent body scroll when menu is open
+  // Prevent body scroll when menu is open and manage focus
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
+      // Focus the menu panel when opened
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          menuRef.current?.focus()
+        }, 150) // Slightly longer delay to ensure transition completes
+      })
     } else {
       document.body.style.overflow = 'unset'
     }
@@ -55,10 +62,10 @@ export default function HamburgerMenu() {
       description: 'Examples & best practices'
     },
     {
-      href: '/support',
-      label: 'Support',
+      href: '/faq',
+      label: 'FAQ',
       icon: HelpCircle,
-      description: 'Get help & contact us'
+      description: 'Frequently asked questions'
     }
   ]
 
@@ -86,9 +93,21 @@ export default function HamburgerMenu() {
       )}
 
       {/* Slide-out Menu */}
-      <div className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-45 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div 
+        ref={menuRef}
+        tabIndex={0}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-secondary-500 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            setIsOpen(false)
+          }
+        }}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-neutral-200">

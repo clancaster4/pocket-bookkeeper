@@ -40,6 +40,7 @@ export default function ChatInterface({
   const [selectedAIModel, setSelectedAIModel] = useState(propSelectedAIModel)
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const [isMinimized, setIsMinimized] = useState(true)
+  const [resetFileUpload, setResetFileUpload] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const { subscription } = useAppStore()
@@ -79,6 +80,9 @@ export default function ChatInterface({
       setInputMessage('')
       setAttachments([])
       setShowFileUpload(false)
+      // Reset the file upload component
+      setResetFileUpload(true)
+      setTimeout(() => setResetFileUpload(false), 100)
       // Don't auto-expand when minimized - let user choose when to maximize
     }
   }
@@ -100,6 +104,8 @@ export default function ChatInterface({
     }))
     
     setAttachments(prev => [...prev, ...newAttachments])
+    // Close file upload area after files are added
+    setShowFileUpload(false)
   }
 
   const removeAttachment = (id: string) => {
@@ -170,36 +176,34 @@ export default function ChatInterface({
     setIsMinimized(!isMinimized)
   }
 
-  // Determine if chat should be full height (when messages exist and not minimized)
-  const shouldBeFullHeight = messages.length > 0 && !isMinimized
+  // Determine if chat should expand (when not minimized)
+  const shouldExpand = !isMinimized
 
   return (
-    <div className={`flex flex-col bg-white rounded-lg shadow-lg border border-neutral-200 transition-all duration-300 relative ${
-      shouldBeFullHeight 
-        ? 'h-screen fixed inset-0 z-50' 
-        : 'max-w-5xl mx-auto w-full h-auto min-h-[300px] sm:min-h-[400px] max-h-[50vh] sm:max-h-[60vh] z-20'
+    <div className={`flex flex-col bg-white rounded-lg shadow-lg border border-neutral-200 transition-all duration-300 ${
+      shouldExpand 
+        ? 'fixed inset-0 w-full h-screen z-50' 
+        : 'relative max-w-4xl mx-auto w-full h-[60vh] min-h-[500px] z-20'
     }`} style={{ pointerEvents: 'auto' }}>
-      {/* Minimize/Maximize Button - Only show when chat is active */}
-      {messages.length > 0 && (
-        <div className="flex justify-between items-center p-2 border-b border-neutral-200">
-          <div className="text-sm font-medium text-neutral-700">
-            {isMinimized ? 'Chat' : 'Chat Interface'}
-          </div>
-          <button
-            onClick={handleMinimizeToggle}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-            title={isMinimized ? 'Maximize chat' : 'Minimize chat'}
-          >
-            {isMinimized ? (
-              <Maximize2 className="w-4 h-4 text-neutral-600" />
-            ) : (
-              <Minimize2 className="w-4 h-4 text-neutral-600" />
-            )}
-          </button>
+      {/* Minimize/Maximize Button - Always show */}
+      <div className="flex justify-between items-center p-2 border-b border-neutral-200">
+        <div className="text-sm font-medium text-neutral-700">
+          {isMinimized ? 'Chat' : 'Chat Interface'}
         </div>
-      )}
+        <button
+          onClick={handleMinimizeToggle}
+          className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          title={isMinimized ? 'Maximize chat' : 'Minimize chat'}
+        >
+          {isMinimized ? (
+            <Maximize2 className="w-4 h-4 text-neutral-600" />
+          ) : (
+            <Minimize2 className="w-4 h-4 text-neutral-600" />
+          )}
+        </button>
+      </div>
 
-      {/* Messages Area - Show when there are messages */}
+      {/* Messages Area - Always show when there are messages */}
       {messages.length > 0 && (
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
           {messages.map((message) => (
@@ -220,7 +224,7 @@ export default function ChatInterface({
     )}
 
     {/* Welcome Message - Show when there are no messages */}
-    {messages.length === 0 && !isMinimized && (
+    {messages.length === 0 && (
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
@@ -231,15 +235,8 @@ export default function ChatInterface({
               Welcome to Pocket Bookkeeper!
             </h2>
             <p className="text-neutral-600">
-              {isSignedIn 
-                ? "I'm your AI bookkeeping assistant. How can I help you today?"
-                : "🎉 Try me free! You get 10 free queries to test my capabilities."}
+              I'm your AI bookkeeping assistant. How can I help you today?
             </p>
-            {!isSignedIn && (
-              <p className="text-sm text-neutral-500 mt-2">
-                No sign-up required to start. Create an account when you're ready for unlimited access.
-              </p>
-            )}
           </div>
 
           <div className="space-y-4">
@@ -290,17 +287,18 @@ export default function ChatInterface({
     )}
 
     {/* File Upload Area */}
-    {showFileUpload && !isMinimized && (
+    {showFileUpload && (
       <div className="px-4 pb-4">
         <FileUpload 
           onFileUpload={handleFileUpload}
           disabled={isLoading}
+          reset={resetFileUpload}
         />
       </div>
     )}
 
     {/* Attachments Preview */}
-    {attachments.length > 0 && !isMinimized && (
+    {attachments.length > 0 && (
       <div className="px-4 pb-4">
         <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
           <h4 className="text-sm font-medium text-neutral-700 mb-2">Attachments:</h4>
@@ -346,47 +344,10 @@ export default function ChatInterface({
       </div>
     )}
 
-    {/* Input Area - Always visible */}
-    <div className="border-t border-neutral-200 p-3 sm:p-6 bg-neutral-50 relative z-30">
-      <div className="flex items-end space-x-2 sm:space-x-3">
-        <div className="flex-1">
-          <textarea
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about bookkeeping, upload documents for analysis, or share screenshots..."
-            className="w-full p-3 sm:p-4 border border-neutral-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white shadow-sm cursor-text"
-            rows={1}
-            disabled={isLoading}
-            style={{ minHeight: '48px', maxHeight: '120px', pointerEvents: 'auto' }}
-          />
-        </div>
-        
-        <div className="flex items-center space-x-1 sm:space-x-2">
-          <button
-            onClick={() => setShowFileUpload(!showFileUpload)}
-            className={`p-2 sm:p-3 rounded-xl transition-colors ${
-              showFileUpload 
-                ? 'bg-secondary-100 text-secondary-600' 
-                : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
-            }`}
-            disabled={isLoading}
-          >
-            <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
-          
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || (!inputMessage.trim() && attachments.length === 0)}
-            className="p-2 sm:p-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-          >
-            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* AI Model Selection - Below Input Box */}
-      <div className="mt-4">
+    {/* Input Area - At the bottom */}
+    <div className="border-t border-neutral-200 p-3 sm:p-6 bg-neutral-50 relative z-30 mt-auto">
+      {/* AI Model Selection - Above Input Box */}
+      <div className="mb-4">
         <div className="relative">
           <button
             onClick={() => setShowAIDropdown(!showAIDropdown)}
@@ -481,6 +442,43 @@ export default function ChatInterface({
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="flex items-end space-x-2 sm:space-x-3">
+        <div className="flex-1">
+          <textarea
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Ask about bookkeeping, upload documents for analysis, or share screenshots..."
+            className="w-full p-3 sm:p-4 border border-neutral-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white shadow-sm cursor-text"
+            rows={1}
+            disabled={isLoading}
+            style={{ minHeight: '48px', maxHeight: '120px', pointerEvents: 'auto' }}
+          />
+        </div>
+        
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <button
+            onClick={() => setShowFileUpload(!showFileUpload)}
+            className={`p-2 sm:p-3 rounded-xl transition-colors ${
+              showFileUpload 
+                ? 'bg-secondary-100 text-secondary-600' 
+                : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
+            }`}
+            disabled={isLoading}
+          >
+            <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+          
+          <button
+            onClick={handleSendMessage}
+            disabled={isLoading || (!inputMessage.trim() && attachments.length === 0)}
+            className="p-2 sm:p-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          >
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
         </div>
       </div>
     </div>

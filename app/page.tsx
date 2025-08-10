@@ -5,8 +5,10 @@ import { Menu, Calculator, BookOpen, DollarSign, MessageCircle, Copy, CheckCircl
 import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
 import Header from '@/components/Header'
 import ChatInterface from '@/components/ChatInterface'
-import ConversationSidebar from '@/components/ConversationSidebar'
+// ConversationSidebar removed - conversations are now ephemeral
 import Disclaimer from '@/components/Disclaimer'
+import LimitExceededModal from '@/components/LimitExceededModal'
+import SubscriptionModal from '@/components/SubscriptionModal'
 import { useConversations } from '@/hooks/useConversations'
 import { useUser as useAppUser } from '@/hooks/useUser'
 import { useAppStore } from '@/lib/store'
@@ -30,12 +32,13 @@ export default function Home() {
   useAppUser()
 
   const [isLoading, setIsLoading] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false) // Start collapsed by default
+  // Sidebar state removed - no conversations sidebar needed
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false)
   const [selectedAIModel, setSelectedAIModel] = useState('everyday')
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [showCancelMessage, setShowCancelMessage] = useState(false)
   const [successPlan, setSuccessPlan] = useState('')
+  const [showLimitExceededModal, setShowLimitExceededModal] = useState(false)
 
   // Handle URL parameters for Stripe checkout and subscription modal
   useEffect(() => {
@@ -103,8 +106,10 @@ export default function Home() {
   }, [conversationsLoaded, conversationSummaries.length, createConversation])
 
   const handleSendMessage = async (message: string, attachments?: FileAttachment[]) => {
-    if (!isSignedIn) {
-      alert('Please sign in to use the chat feature.')
+    // Check message limit for unauthenticated users
+    const { usage } = useAppStore.getState()
+    if (!isSignedIn && usage.remainingQueries <= 0) {
+      setShowLimitExceededModal(true)
       return
     }
 
@@ -150,9 +155,8 @@ export default function Home() {
 
       if (!response.ok) {
         if (response.status === 429) {
-          // Handle rate limiting
-          const errorMessage = data.details?.message || 'You have exceeded your query limit. Please upgrade to continue.'
-          alert(errorMessage)
+          // Handle rate limiting - show modal instead of alert
+          setShowLimitExceededModal(true)
           return
         }
         throw new Error(data.error || 'Failed to send message')
@@ -188,6 +192,12 @@ export default function Home() {
 
       console.log('Messages added successfully')
 
+      // Update the usage counter for unauthenticated users
+      if (!isSignedIn) {
+        const { incrementQueryCount } = useAppStore.getState()
+        incrementQueryCount()
+      }
+
     } catch (error) {
       console.error('Error sending message:', error)
       alert('Failed to send message. Please try again.')
@@ -197,15 +207,8 @@ export default function Home() {
   }
 
   const handleNewConversation = () => {
+    // Clear current conversation and start fresh
     createConversation()
-  }
-
-  const handleConversationSelect = (conversationId: string) => {
-    setCurrentConversationId(conversationId)
-  }
-
-  const handleDeleteConversation = (conversationId: string) => {
-    deleteConversation(conversationId)
   }
 
   const handleSubscriptionModalChange = (isOpen: boolean) => {
@@ -214,6 +217,15 @@ export default function Home() {
 
   const handleAIModelChange = (modelId: string) => {
     setSelectedAIModel(modelId)
+  }
+
+  const handleLimitExceededClose = () => {
+    setShowLimitExceededModal(false)
+  }
+
+  const handleLimitExceededUpgrade = () => {
+    setShowLimitExceededModal(false)
+    setSubscriptionModalOpen(true)
   }
 
   const getPlanName = (planId: string): string => {
@@ -307,119 +319,22 @@ export default function Home() {
         </div>
       )}
       
-      <main className="flex h-[calc(70vh-120px)] bg-gradient-to-b from-white to-neutral-50">
-        {/* Sidebar - Hidden when subscription modal is open */}
-        {!subscriptionModalOpen && (
-          <ConversationSidebar
-            conversations={conversationSummaries}
-            currentConversationId={currentConversationId}
-            onConversationSelect={handleConversationSelect}
-            onNewConversation={handleNewConversation}
-            onDeleteConversation={handleDeleteConversation}
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-          />
-        )}
-
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col relative">
-          {/* Mobile Sidebar Toggle - Hidden when subscription modal is open */}
-          {!subscriptionModalOpen && (
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden absolute top-4 left-4 z-10 p-2 bg-white border border-neutral-200 text-neutral-600 rounded-lg hover:bg-neutral-50 transition-colors"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          )}
+      <main className="flex h-auto bg-gradient-to-b from-white to-neutral-50">
+        {/* Main Chat Area - Full width since sidebar is removed */}
+        <div className="w-full flex flex-col relative">
 
           {currentConversation ? (
             <>
-              {/* Chat Interface - Always visible and positioned at bottom */}
-              <div className="flex-1 relative flex flex-col">
-                {/* Show example queries when no messages - positioned above chat */}
-                {currentConversation.messages.length === 0 && (
-                  <div className="flex-1 flex flex-col justify-center p-4 pb-0">
-                    <div className="text-center mb-6">
-                      <p className="text-base text-neutral-600">Start a conversation with your bookkeeping assistant!</p>
-                      <p className="text-xs mt-1 text-neutral-500">You can ask questions, upload documents, or share screenshots for analysis.</p>
-                    </div>
-                    
-                    {/* Example Queries */}
-                    <div className="max-w-3xl mx-auto">
-                      <div className="text-center mb-4">
-                        <div className="flex items-center justify-center space-x-2 mb-1">
-                          <MessageCircle className="w-4 h-4 text-secondary-600" />
-                          <h3 className="text-base font-semibold text-neutral-800">
-                            Try these example queries
-                          </h3>
-                        </div>
-                        <p className="text-xs text-neutral-600">
-                          Click any example to get started with your bookkeeping questions
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {[
-                          "How do I record a client payment in my ledger?",
-                          "What's the best way to categorize business expenses for taxes?",
-                          "Can you guide me through setting up a simple profit and loss statement?",
-                          "How should I track inventory for my small shop?",
-                          "What deductions can I claim as a freelancer?",
-                          "Help me understand cash flow basics for my startup.",
-                          "How do I reconcile my bank statements step by step?"
-                        ].map((query, index) => (
-                          <button
-                            key={index}
-                            onClick={() => {
-                              // Auto-populate chat input
-                              const textarea = document.querySelector('textarea[placeholder*="Ask about bookkeeping"]') as HTMLTextAreaElement
-                              if (textarea) {
-                                textarea.value = query
-                                textarea.focus()
-                                // Trigger change event
-                                const event = new Event('input', { bubbles: true })
-                                textarea.dispatchEvent(event)
-                              }
-                            }}
-                            className="group relative p-2 sm:p-3 bg-white/60 hover:bg-white/80 border border-neutral-200 hover:border-secondary-300 rounded-lg text-left transition-all duration-300 hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2"
-                            aria-label={`Click to ask: ${query}`}
-                          >
-                            <div className="flex items-start justify-between">
-                                                             <p className="text-xs sm:text-sm text-neutral-700 leading-relaxed pr-6">
-                                {query}
-                              </p>
-                              <div className="flex-shrink-0 ml-2">
-                                <Copy className="w-3 h-3 text-neutral-400 group-hover:text-secondary-600 transition-colors" />
-                              </div>
-                            </div>
-                            
-                            {/* Hover effect overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-secondary-500/5 to-accent-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="mt-3 text-center">
-                        <p className="text-xs text-neutral-500">
-                          💡 Tip: You can also upload documents and images for AI analysis
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Chat Interface - Always at bottom */}
-                <div className="w-full">
-                  <ChatInterface
-                    messages={currentConversation.messages}
-                    onSendMessage={handleSendMessage}
-                    isLoading={isLoading}
-                    selectedAIModel={selectedAIModel}
-                    onAIModelChange={handleAIModelChange}
-                    onSubscriptionModalChange={handleSubscriptionModalChange}
-                  />
-                </div>
+              {/* Chat Interface - Sized to content */}
+              <div className="p-4 pb-2">
+                <ChatInterface
+                  messages={currentConversation.messages}
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                  selectedAIModel={selectedAIModel}
+                  onAIModelChange={handleAIModelChange}
+                  onSubscriptionModalChange={handleSubscriptionModalChange}
+                />
               </div>
             </>
           ) : (
@@ -434,7 +349,7 @@ export default function Home() {
       </main>
 
       {/* Features Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-16 bg-gradient-to-b from-neutral-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 bg-gradient-to-b from-neutral-50 to-white">
         <div className="grid md:grid-cols-3 gap-8">
           <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <div className="w-16 h-16 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-secondary-500/25">
@@ -463,7 +378,7 @@ export default function Home() {
       </div>
 
       {/* Example Questions Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-15 pt-20 bg-gradient-to-b from-white to-neutral-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-4 bg-gradient-to-b from-white to-neutral-50">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-neutral-900 mb-6">Example Questions</h2>
           <p className="text-xl text-neutral-600 max-w-3xl mx-auto">Try asking your AI assistant these common bookkeeping questions to get started</p>
@@ -608,6 +523,21 @@ export default function Home() {
       <div className="py-8 bg-neutral-50"></div>
 
       <Disclaimer />
+
+      {/* Limit Exceeded Modal */}
+      <LimitExceededModal
+        isOpen={showLimitExceededModal}
+        onClose={handleLimitExceededClose}
+        onUpgrade={handleLimitExceededUpgrade}
+      />
+
+      {/* Subscription Modal */}
+      {subscriptionModalOpen && (
+        <SubscriptionModal
+          isOpen={subscriptionModalOpen}
+          onClose={() => setSubscriptionModalOpen(false)}
+        />
+      )}
     </div>
   )
 } 

@@ -45,7 +45,7 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
       {/* Avatar */}
       <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
         message.role === 'user' 
-          ? 'bg-gradient-to-r from-green-500 to-green-600' 
+          ? 'bg-gradient-to-r from-slate-400 to-slate-500' 
           : selectedAIModel === 'elite'
             ? 'bg-gradient-to-r from-yellow-400 to-yellow-500'
             : 'bg-gradient-to-r from-green-600 to-green-700'
@@ -85,7 +85,7 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
                 <div
                   className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
                     message.role === 'user'
-                      ? 'bg-green-50 border-green-200 hover:bg-green-100'
+                      ? 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                       : 'bg-neutral-50 border-neutral-200 hover:bg-neutral-100'
                   }`}
                   onClick={() => handleFileClick(attachment)}
@@ -106,13 +106,13 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
                   {/* File Info */}
                   <div className="flex items-center space-x-2">
                     <div className={`p-1 rounded ${
-                      message.role === 'user' ? 'bg-green-200' : 'bg-neutral-200'
+                      message.role === 'user' ? 'bg-slate-200' : 'bg-neutral-200'
                     }`}>
                       {getFileIcon(attachment.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${
-                        message.role === 'user' ? 'text-green-700' : 'text-neutral-700'
+                        message.role === 'user' ? 'text-slate-700' : 'text-neutral-700'
                       }`}>
                         {attachment.name}
                       </p>
@@ -122,7 +122,7 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
                     </div>
                     {(attachment.url || attachment.preview) && (
                       <div className={`p-1 rounded ${
-                        message.role === 'user' ? 'bg-green-200' : 'bg-neutral-200'
+                        message.role === 'user' ? 'bg-slate-200' : 'bg-neutral-200'
                       }`}>
                         {attachment.url ? (
                           <ExternalLink className="w-3 h-3 text-neutral-600" />

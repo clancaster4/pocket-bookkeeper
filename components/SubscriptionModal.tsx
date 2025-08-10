@@ -120,7 +120,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 <ul className="space-y-3 text-left">
                   <li className="flex items-start space-x-3">
                     <Check className="w-5 h-5 text-neutral-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-neutral-700">10 queries per month</span>
+                    <span className="text-sm text-neutral-700">5 messages per month</span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <Check className="w-5 h-5 text-neutral-500 mt-0.5 flex-shrink-0" />
@@ -150,7 +150,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
               <div className="text-center">
                 <h3 className="text-xl font-bold text-neutral-900 mb-2">Everyday Assistant</h3>
                 <div className="mb-4">
-                  <span className="text-3xl font-bold text-neutral-900">$6.99</span>
+                  <span className="text-3xl font-bold text-neutral-900">$9.99</span>
                   <span className="text-neutral-600">/month</span>
                 </div>
                 <div className="mb-4">
@@ -202,7 +202,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
               <div className="text-center">
                 <h3 className="text-xl font-bold text-neutral-900 mb-2">Elite Advisor</h3>
                 <div className="mb-4">
-                  <span className="text-3xl font-bold text-neutral-900">$14.99</span>
+                  <span className="text-3xl font-bold text-neutral-900">$19.99</span>
                   <span className="text-neutral-600">/month</span>
                 </div>
                 <div className="mb-4">

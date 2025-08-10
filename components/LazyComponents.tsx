@@ -19,25 +19,7 @@ export const LazySubscriptionModal = dynamic(
   }
 )
 
-export const LazyConversationSidebar = dynamic(
-  () => import('./ConversationSidebar'),
-  {
-    loading: () => (
-      <div className="w-80 bg-white border-r border-neutral-200 lg:block hidden">
-        <div className="p-4 border-b border-neutral-200">
-          <div className="h-4 bg-neutral-200 rounded animate-pulse mb-2"></div>
-          <div className="h-4 bg-neutral-200 rounded animate-pulse w-3/4"></div>
-        </div>
-        <div className="p-4 space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 bg-neutral-100 rounded animate-pulse"></div>
-          ))}
-        </div>
-      </div>
-    ),
-    ssr: false,
-  }
-)
+// LazyConversationSidebar removed - conversations are now ephemeral
 
 export const LazyFileUpload = dynamic(
   () => import('./FileUpload'),

@@ -1,111 +1,29 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Conversation, ConversationSummary, Message } from '@/types/chat'
 
-const STORAGE_KEY = 'pocket-bookkeeper-conversations'
-const MAX_CONVERSATIONS = 50
-
 export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // Load conversations from localStorage on mount
+  // Set loaded to true immediately since we're not loading from storage
   useEffect(() => {
-    console.log('useConversations: useEffect triggered')
-    
-    // Check if we're in the browser environment
-    if (typeof window === 'undefined') {
-      console.log('useConversations: Not in browser environment, setting isLoaded to true')
-      setIsLoaded(true)
-      return
-    }
-
-    console.log('useConversations: Loading from localStorage...')
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      console.log('useConversations: Stored data:', stored)
-      
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        console.log('useConversations: Parsed data:', parsed)
-        
-        // Ensure parsed is an array
-        if (!Array.isArray(parsed)) {
-          console.log('useConversations: Parsed data is not an array, using empty array')
-          setConversations([])
-          setIsLoaded(true)
-          return
-        }
-        
-        // Convert date strings back to Date objects
-        const conversationsWithDates = parsed.map((conv: any) => ({
-          ...conv,
-          createdAt: new Date(conv.createdAt),
-          updatedAt: new Date(conv.updatedAt),
-          messages: conv.messages.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp)
-          }))
-        }))
-        console.log('useConversations: Setting conversations:', conversationsWithDates)
-        setConversations(conversationsWithDates)
-        
-        // Set the most recent conversation as current
-        if (conversationsWithDates.length > 0) {
-          const mostRecent = conversationsWithDates.reduce((latest: Conversation, current: Conversation) => 
-            current.updatedAt > latest.updatedAt ? current : latest
-          )
-          console.log('useConversations: Setting current conversation:', mostRecent.id)
-          setCurrentConversationId(mostRecent.id)
-        }
-      } else {
-        console.log('useConversations: No stored conversations found')
-        setConversations([])
-      }
-    } catch (error) {
-      console.error('Error loading conversations from localStorage:', error)
-      setConversations([])
-    } finally {
-      console.log('useConversations: Setting isLoaded to true')
-      setIsLoaded(true)
-    }
+    setIsLoaded(true)
   }, [])
 
-  // Save conversations to localStorage whenever they change
-  useEffect(() => {
-    // Check if we're in the browser environment
-    if (typeof window === 'undefined') return
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations))
-    } catch (error) {
-      console.error('Error saving conversations to localStorage:', error)
-    }
-  }, [conversations])
-
   const createConversation = useCallback((title?: string) => {
-    console.log('useConversations: Creating new conversation with title:', title)
+    console.log('useConversations: Creating new ephemeral conversation')
     const newConversation: Conversation = {
       id: Date.now().toString(),
-      title: title || 'New Conversation',
-      messages: [{
-        id: '1',
-        role: 'assistant',
-        content: "👋 Hi! I'm your Pocket Bookkeeper assistant. I'm here to help you with all your bookkeeping and accounting questions!\n\n💡 I can help you with:\n\n• 📝 Recording transactions and expenses\n• 💰 Understanding tax deductions\n• 📊 Managing cash flow\n• 🏢 Setting up basic accounting systems\n• ⚠️ Avoiding common bookkeeping mistakes\n\nWhat would you like to know about today?",
-        timestamp: new Date(),
-      }],
+      title: title || 'Chat Session',
+      messages: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     }
 
-    console.log('useConversations: New conversation created:', newConversation)
-    setConversations(prev => {
-      const updated = [newConversation, ...prev]
-      // Keep only the most recent conversations
-      const result = updated.slice(0, MAX_CONVERSATIONS)
-      console.log('useConversations: Updated conversations list:', result)
-      return result
-    })
+    console.log('useConversations: New ephemeral conversation created:', newConversation)
+    // Replace any existing conversation with the new one (only keep one active session)
+    setConversations([newConversation])
     setCurrentConversationId(newConversation.id)
     console.log('useConversations: Set current conversation ID to:', newConversation.id)
     return newConversation.id
@@ -140,21 +58,12 @@ export function useConversations() {
   }, [])
 
   const deleteConversation = useCallback((conversationId: string) => {
-    setConversations(prev => prev.filter(conv => conv.id !== conversationId))
-    
-    // If we're deleting the current conversation, switch to the most recent one
-    if (currentConversationId === conversationId) {
-      const remaining = conversations.filter(conv => conv.id !== conversationId)
-      if (remaining.length > 0) {
-        const mostRecent = remaining.reduce((latest, current) => 
-          current.updatedAt > latest.updatedAt ? current : latest
-        )
-        setCurrentConversationId(mostRecent.id)
-      } else {
-        setCurrentConversationId(null)
-      }
-    }
-  }, [currentConversationId, conversations])
+    // Clear the current conversation and create a new empty one
+    setConversations([])
+    setCurrentConversationId(null)
+    // Automatically create a new conversation
+    createConversation()
+  }, [createConversation])
 
   const getCurrentConversation = useCallback(() => {
     return conversations.find(conv => conv.id === currentConversationId) || null

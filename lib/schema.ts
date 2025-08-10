@@ -14,7 +14,7 @@ export const users = pgTable('users', {
   businessType: varchar('business_type', { length: 100 }), // e.g., 'LLC', 'Sole Proprietorship', 'Corporation'
   tier: varchar('tier', { length: 20 }).notNull().default('free'), // 'free', 'basic', 'elite'
   queryCount: integer('query_count').notNull().default(0), // Number of queries used this month
-  queryLimit: integer('query_limit').notNull().default(10), // Monthly query limit
+  queryLimit: integer('query_limit').notNull().default(5), // Monthly query limit
   subscriptionStatus: varchar('subscription_status', { length: 20 }).notNull().default('active'), // 'active', 'canceled', 'past_due'
   stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
   stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
@@ -28,22 +28,8 @@ export const users = pgTable('users', {
   tierIdx: index('idx_users_tier').on(table.tier),
 }))
 
-// Chat messages table - stores conversation history
-export const chatMessages = pgTable('chat_messages', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  conversationId: uuid('conversation_id').notNull(),
-  role: varchar('role', { length: 20 }).notNull(), // 'user', 'assistant'
-  content: text('content').notNull(),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
-  modelUsed: varchar('model_used', { length: 20 }), // Track which AI model was used
-  tokensUsed: integer('tokens_used'), // Track token usage for cost analysis
-  responseTimeMs: integer('response_time_ms'), // Track response time for performance monitoring
-}, (table) => ({
-  userIdIdx: index('idx_chat_messages_user_id').on(table.userId),
-  conversationIdIdx: index('idx_chat_messages_conversation_id').on(table.conversationId),
-  timestampIdx: index('idx_chat_messages_timestamp').on(table.timestamp),
-}))
+// Note: Chat messages are no longer stored in the database for privacy.
+// All conversations are ephemeral and only exist during the user session.
 
 // Subscription events table - tracks subscription changes
 export const subscriptionEvents = pgTable('subscription_events', {
@@ -98,18 +84,12 @@ export const stripeCustomers = pgTable('stripe_customers', {
 
 // Define relationships
 export const usersRelations = relations(users, ({ many }) => ({
-  chatMessages: many(chatMessages),
   subscriptionEvents: many(subscriptionEvents),
   usageAnalytics: many(usageAnalytics),
   stripeCustomers: many(stripeCustomers),
 }))
 
-export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
-  user: one(users, {
-    fields: [chatMessages.userId],
-    references: [users.id],
-  }),
-}))
+// Removed chatMessagesRelations since chat messages are no longer stored
 
 export const subscriptionEventsRelations = relations(subscriptionEvents, ({ one }) => ({
   user: one(users, {
@@ -135,8 +115,6 @@ export const stripeCustomersRelations = relations(stripeCustomers, ({ one }) => 
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users)
 export const selectUserSchema = createSelectSchema(users)
-export const insertChatMessageSchema = createInsertSchema(chatMessages)
-export const selectChatMessageSchema = createSelectSchema(chatMessages)
 export const insertSubscriptionEventSchema = createInsertSchema(subscriptionEvents)
 export const selectSubscriptionEventSchema = createSelectSchema(subscriptionEvents)
 export const insertUsageAnalyticsSchema = createInsertSchema(usageAnalytics)
@@ -147,8 +125,6 @@ export const selectStripeCustomerSchema = createSelectSchema(stripeCustomers)
 // Export types for easier use
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
-export type ChatMessage = typeof chatMessages.$inferSelect
-export type NewChatMessage = typeof chatMessages.$inferInsert
 export type SubscriptionEvent = typeof subscriptionEvents.$inferSelect
 export type NewSubscriptionEvent = typeof subscriptionEvents.$inferInsert
 export type UsageAnalytics = typeof usageAnalytics.$inferSelect

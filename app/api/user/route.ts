@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       lastName: lastName,
       tier: 'free',
       queryCount: 0,
-      queryLimit: 10,
+      queryLimit: 5,
     }).returning()
 
     return NextResponse.json(newUser)

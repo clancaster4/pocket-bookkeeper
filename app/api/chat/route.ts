@@ -28,7 +28,7 @@ function getClientIP(request: NextRequest): string {
 }
 
 // Check and update usage for an IP address
-function checkAndUpdateUsage(ip: string, limit: number = 10): { allowed: boolean, remaining: number, resetTime: Date } {
+function checkAndUpdateUsage(ip: string, limit: number = 5): { allowed: boolean, remaining: number, resetTime: Date } {
   const now = new Date()
   const currentUsage = ipUsageMap.get(ip)
   
@@ -55,7 +55,7 @@ function checkAndUpdateUsage(ip: string, limit: number = 10): { allowed: boolean
 }
 
 // Get usage info for an IP address
-function getUsageInfo(ip: string, limit: number = 10): { count: number, remaining: number, resetTime: Date } {
+function getUsageInfo(ip: string, limit: number = 5): { count: number, remaining: number, resetTime: Date } {
   const currentUsage = ipUsageMap.get(ip)
   const now = new Date()
   
@@ -644,16 +644,16 @@ export async function POST(request: NextRequest) {
     
     // For now, use IP-based tracking
     clientIP = getClientIP(request)
-    usageCheck = checkAndUpdateUsage(clientIP, 10)
+    usageCheck = checkAndUpdateUsage(clientIP, 5)
     
     if (!usageCheck.allowed) {
       return NextResponse.json(
         { 
-          error: 'Free query limit exceeded',
+          error: 'Free message limit exceeded',
           details: {
-            limit: 10,
+            limit: 5,
             resetTime: usageCheck.resetTime.toISOString(),
-            message: 'You have exceeded your free query limit. Please upgrade to a paid plan for unlimited access.'
+            message: 'You have exceeded your free message limit. Please upgrade to a paid plan for unlimited access.'
           }
         },
         { status: 429 }
@@ -713,8 +713,8 @@ export async function POST(request: NextRequest) {
     // Get AI response
     const { response, modelUsed } = await getAIResponse(message, limitedHistory, modelToUse, attachments)
 
-    // Log the interaction (in production, save to database)
-    console.log(`Chat interaction: IP=${clientIP}, Model=${modelUsed}, Message length=${message.length}, Response length=${response.length}, Attachments=${attachments?.length || 0}, Remaining queries=${usageCheck.remaining}`)
+    // Log the interaction for analytics (no personal data stored)
+    console.log(`Chat interaction: IP=${clientIP.slice(0, 8)}***, Model=${modelUsed}, Message length=${message.length}, Response length=${response.length}, Attachments=${attachments?.length || 0}, Remaining queries=${usageCheck.remaining}`)
 
     return NextResponse.json({
       response,
@@ -746,7 +746,7 @@ export async function GET(request: NextRequest) {
     
     // For now, use IP-based tracking
     clientIP = getClientIP(request)
-    usageInfo = getUsageInfo(clientIP, 10)
+    usageInfo = getUsageInfo(clientIP, 5)
     
     return NextResponse.json({
       ip: clientIP,
@@ -754,7 +754,7 @@ export async function GET(request: NextRequest) {
       usage: {
         count: usageInfo.count,
         remaining: usageInfo.remaining,
-        limit: usageInfo.remaining === -1 ? 'unlimited' : 10,
+        limit: usageInfo.remaining === -1 ? 'unlimited' : 5,
         resetTime: usageInfo.resetTime.toISOString()
       }
     })

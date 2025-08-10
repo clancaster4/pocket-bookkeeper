@@ -19,7 +19,7 @@
 3. Set the following:
    - **Name**: Everyday Assistant
    - **Description**: Advanced bookkeeping guidance with unlimited queries
-   - **Pricing**: $6.99/month
+   - **Pricing**: $9.99/month
    - **Billing**: Recurring (monthly)
 4. Copy the **Price ID** (starts with `price_`)
 
@@ -27,7 +27,7 @@
 1. Create another product with:
    - **Name**: Elite Advisor
    - **Description**: Premium AI model with advanced reasoning
-   - **Pricing**: $14.99/month
+   - **Pricing**: $19.99/month
    - **Billing**: Recurring (monthly)
 4. Copy the **Price ID** (starts with `price_`)
 

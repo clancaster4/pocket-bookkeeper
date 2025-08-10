@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Upload, X, FileText, Image, File, AlertCircle } from 'lucide-react'
 
 interface FileUploadProps {
   onFileUpload: (files: File[]) => void
   disabled?: boolean
+  reset?: boolean
 }
 
 interface UploadedFile {
@@ -16,10 +17,21 @@ interface UploadedFile {
   error?: string
 }
 
-export default function FileUpload({ onFileUpload, disabled = false }: FileUploadProps) {
+export default function FileUpload({ onFileUpload, disabled = false, reset = false }: FileUploadProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Reset the component when reset prop changes
+  useEffect(() => {
+    if (reset) {
+      setUploadedFiles([])
+      setIsDragOver(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }, [reset])
 
   const acceptedFileTypes = [
     'image/jpeg',

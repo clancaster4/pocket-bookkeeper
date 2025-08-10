@@ -25,8 +25,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   isLoading: false,
   usage: {
     queryCount: 0,
-    queryLimit: 10,
-    remainingQueries: 10,
+    queryLimit: 5,
+    remainingQueries: 5,
   },
   subscription: {
     tier: 'free',
