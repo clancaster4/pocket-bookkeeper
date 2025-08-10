@@ -71,11 +71,193 @@ function getUsageInfo(ip: string, limit: number = 10): { count: number, remainin
   }
 }
 
-// Mock AI response function - replace with actual AI API integration
-async function getAIResponse(message: string, history: any[], model: string = 'standard-ai', attachments?: any[]): Promise<{ response: string, modelUsed: string }> {
-  // This is a mock implementation - replace with actual AI API call
-  // The model parameter determines which AI model to use
+// Topic validation - Check if the message is related to accounting/bookkeeping/finance
+function isTopicValid(message: string): { valid: boolean, reason?: string } {
+  const lowerMessage = message.toLowerCase()
   
+  // List of allowed topics and keywords
+  const allowedTopics = [
+    // Bookkeeping
+    'bookkeep', 'accounting', 'accountant', 'ledger', 'journal', 'entry', 'entries',
+    'reconcile', 'reconciliation', 'balance', 'books', 'record', 'transaction',
+    
+    // Expenses & Income
+    'expense', 'cost', 'spend', 'payment', 'invoice', 'receipt', 'bill',
+    'revenue', 'income', 'earning', 'profit', 'loss', 'margin',
+    
+    // Taxes
+    'tax', 'deduct', 'irs', 'w2', 'w9', '1099', '1040', 'filing',
+    'withhold', 'quarterly', 'estimated tax', 'sales tax', 'payroll tax',
+    
+    // Financial Management
+    'cash flow', 'budget', 'forecast', 'financial', 'fiscal', 'audit',
+    'asset', 'liability', 'equity', 'capital', 'depreciation', 'amortization',
+    
+    // Business Finance
+    'business', 'company', 'llc', 'corporation', 's-corp', 'c-corp',
+    'sole proprietor', 'partnership', 'ein', 'dba', 'contractor', 'freelance',
+    
+    // Software & Tools
+    'quickbooks', 'xero', 'freshbooks', 'wave', 'sage', 'peachtree',
+    'spreadsheet', 'excel', 'category', 'categorize', 'chart of accounts',
+    
+    // Banking
+    'bank', 'checking', 'savings', 'credit card', 'merchant', 'stripe',
+    'paypal', 'square', 'venmo', 'zelle', 'ach', 'wire',
+    
+    // Payroll
+    'payroll', 'salary', 'wage', 'employee', 'contractor', 'benefits',
+    'overtime', 'commission', 'bonus', 'withholding',
+    
+    // Reporting
+    'report', 'statement', 'p&l', 'profit and loss', 'balance sheet',
+    'cash flow statement', 'trial balance', 'general ledger', 'aging',
+    
+    // Compliance
+    'compliance', 'regulation', 'gaap', 'audit', 'documentation',
+    'record keeping', 'retention', 'filing deadline'
+  ]
+  
+  // Check if message contains any allowed topics
+  const hasAllowedTopic = allowedTopics.some(topic => lowerMessage.includes(topic))
+  
+  // List of explicitly blocked topics (non-financial)
+  const blockedTopics = [
+    // Entertainment
+    'movie', 'film', 'music', 'game', 'sport', 'entertainment',
+    
+    // Personal non-financial
+    'recipe', 'cooking', 'travel', 'vacation', 'weather', 'news',
+    'relationship', 'dating', 'health', 'medical', 'doctor',
+    
+    // Technical non-financial
+    'programming', 'coding', 'javascript', 'python', 'html', 'css',
+    'computer', 'software development', 'app development',
+    
+    // Academic non-financial
+    'homework', 'essay', 'poem', 'story', 'creative writing',
+    'history', 'science', 'math problem', 'physics', 'chemistry'
+  ]
+  
+  // Check if message contains blocked topics
+  const hasBlockedTopic = blockedTopics.some(topic => lowerMessage.includes(topic))
+  
+  // Special case: Allow general greetings and basic questions about the service
+  const isGreeting = /^(hi|hello|hey|good morning|good afternoon|good evening|thanks|thank you|bye|goodbye)[\s!.,?]*$/i.test(message.trim())
+  const isServiceQuestion = lowerMessage.includes('what can you help') || 
+                           lowerMessage.includes('what do you do') ||
+                           lowerMessage.includes('how can you help') ||
+                           lowerMessage.includes('what services')
+  
+  if (isGreeting || isServiceQuestion) {
+    return { valid: true }
+  }
+  
+  // If it has blocked topics, reject
+  if (hasBlockedTopic && !hasAllowedTopic) {
+    return { 
+      valid: false, 
+      reason: 'off-topic' 
+    }
+  }
+  
+  // If it doesn't have allowed topics and is more than just a short phrase, reject
+  if (!hasAllowedTopic && message.split(' ').length > 3) {
+    return { 
+      valid: false, 
+      reason: 'not-financial' 
+    }
+  }
+  
+  return { valid: true }
+}
+
+// System prompt for the AI to enforce topic restrictions
+const SYSTEM_PROMPT = `You are Pocket Bookkeeper, an AI assistant specialized EXCLUSIVELY in accounting, bookkeeping, and finance for small businesses.
+
+STRICT RULES:
+1. You ONLY answer questions related to:
+   - Bookkeeping and accounting
+   - Tax preparation and deductions
+   - Financial management and cash flow
+   - Business expenses and income tracking
+   - Financial software (QuickBooks, Xero, etc.)
+   - Business structure (LLC, S-Corp, etc.)
+   - Payroll and employee finances
+   - Financial reporting and compliance
+   - Invoicing and payments
+
+2. You MUST REFUSE to answer questions about:
+   - Non-financial topics (entertainment, travel, recipes, etc.)
+   - Personal advice unrelated to business finance
+   - Technical/programming help (unless related to accounting software)
+   - Academic homework (unless it's accounting/finance coursework)
+   - Medical, legal (non-tax), or other professional services
+
+3. When refusing off-topic questions, be polite and redirect to financial topics.
+
+4. Always maintain professional boundaries as a bookkeeping expert.
+
+5. Provide accurate, helpful financial guidance while staying within your expertise.`
+
+// Mock AI response function with topic restrictions
+async function getAIResponse(message: string, history: any[], model: string = 'standard-ai', attachments?: any[]): Promise<{ response: string, modelUsed: string }> {
+  // First, validate the topic
+  const topicValidation = isTopicValid(message)
+  
+  if (!topicValidation.valid) {
+    // Return a helpful error message based on the reason
+    let response = ''
+    
+    if (topicValidation.reason === 'off-topic') {
+      response = `🚫 **I'm a Bookkeeping Specialist**
+
+I apologize, but I can only help with accounting, bookkeeping, and finance-related questions. I noticed your question seems to be about a non-financial topic.
+
+**I can help you with:**
+• 📊 Expense tracking and categorization
+• 💰 Tax deductions and preparation
+• 📈 Financial reports and analysis
+• 💵 Cash flow management
+• 🧾 Invoice and payment processing
+• 📋 QuickBooks and accounting software
+• 🏢 Business structure and compliance
+• 💼 Payroll and employee finances
+
+**Example questions I can answer:**
+• "How should I categorize this business expense?"
+• "What tax deductions can I claim as a freelancer?"
+• "How do I reconcile my bank statements?"
+• "Should I form an LLC or S-Corp?"
+
+Please ask me a bookkeeping or finance-related question, and I'll be happy to help!`
+    } else {
+      response = `🤔 **Let Me Help With Your Bookkeeping Needs**
+
+I'm Pocket Bookkeeper, your AI assistant for all things accounting and finance. I'm not sure how to help with that particular request, but I'm an expert in business financial management!
+
+**Try asking me about:**
+• 📝 How to track business expenses
+• 🧮 Understanding financial statements
+• 💡 Tax-saving strategies for small businesses
+• 📊 Setting up your chart of accounts
+• 💰 Managing cash flow
+• 📱 Using accounting software effectively
+• 🏦 Business banking best practices
+• 📈 Financial planning and budgeting
+
+**Quick Start Questions:**
+• "What expenses can I deduct as a business owner?"
+• "How do I prepare for tax season?"
+• "What's the difference between cash and accrual accounting?"
+
+What bookkeeping or financial question can I help you with today?`
+    }
+    
+    return { response, modelUsed: model }
+  }
+  
+  // If topic is valid, continue with normal processing
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
   
@@ -84,6 +266,88 @@ async function getAIResponse(message: string, history: any[], model: string = 's
   const hasAttachments = attachments && attachments.length > 0
   
   let response = ''
+  
+  // Handle greetings
+  if (/^(hi|hello|hey|good morning|good afternoon|good evening)[\s!.,?]*$/i.test(message.trim())) {
+    response = `👋 **Hello! Welcome to Pocket Bookkeeper**
+
+I'm your AI-powered bookkeeping assistant, here to help with all your accounting and financial management needs.
+
+**I can help you with:**
+• 📊 Expense tracking and categorization
+• 💰 Tax deductions and savings
+• 📈 Financial reports and analysis
+• 💵 Cash flow management
+• 🧾 Invoice and receipt processing
+• 📋 QuickBooks and software guidance
+• 🏢 Business structure advice
+• 💼 Payroll and compliance
+
+**How can I help with your bookkeeping today?**
+
+Feel free to:
+• Ask a specific question about your finances
+• Upload a receipt or document for analysis
+• Get help with tax deductions
+• Learn about financial best practices
+
+What bookkeeping question can I answer for you?`
+  }
+  
+  // Handle service questions
+  else if (lowerMessage.includes('what can you help') || lowerMessage.includes('what do you do')) {
+    response = `📚 **I'm Your Expert Bookkeeping Assistant**
+
+I specialize exclusively in accounting, bookkeeping, and financial management for small businesses. Here's how I can help:
+
+**My Areas of Expertise:**
+
+📊 **Bookkeeping & Accounting**
+• Expense categorization
+• Double-entry bookkeeping
+• Chart of accounts setup
+• Journal entries
+• Bank reconciliation
+
+💰 **Tax Assistance**
+• Identifying deductions
+• Quarterly tax planning
+• 1099 vs W-2 guidance
+• Business vs personal expenses
+• Tax document preparation
+
+📈 **Financial Analysis**
+• Understanding P&L statements
+• Balance sheet analysis
+• Cash flow forecasting
+• Financial ratios
+• Profit margin calculations
+
+💼 **Business Finance**
+• LLC vs S-Corp decisions
+• Business structure advice
+• Contractor vs employee classification
+• Business banking setup
+• Credit and loan guidance
+
+🖥️ **Software Support**
+• QuickBooks assistance
+• Excel/spreadsheet formulas
+• Xero, FreshBooks, Wave help
+• Integration guidance
+• Report generation
+
+📋 **Compliance & Documentation**
+• Record keeping requirements
+• Audit preparation
+• Financial documentation
+• Retention policies
+• Regulatory compliance
+
+**Note:** I focus solely on financial topics. For non-financial questions, please consult appropriate specialists.
+
+What specific bookkeeping or financial question can I help you with?`
+  }
   
   // Handle document/image analysis
   if (hasAttachments) {
