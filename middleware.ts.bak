@@ -3,8 +3,8 @@ import { authMiddleware } from "@clerk/nextjs/server";
 export default authMiddleware({
   publicRoutes: [
     "/",
-    "/about", 
-    "/how-to-use",
+    "/about",
+    "/how-to-use", 
     "/faq",
     "/popular-uses",
     "/sign-in(.*)",
@@ -12,12 +12,19 @@ export default authMiddleware({
     "/api/webhook(.*)",
     "/api/chat",
     "/api/create-checkout-session",
+    "/sitemap.xml",
   ],
   ignoredRoutes: [
     "/api/webhook(.*)",
+    "/sitemap.xml",
+    "/_next(.*)",
+    "/favicon.ico",
   ],
 });
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/((?!_next|favicon.ico|.*\\..*).)",
+    "/(api|trpc)(.*)"
+  ],
 }; 
