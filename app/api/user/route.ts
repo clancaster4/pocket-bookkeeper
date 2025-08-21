@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db, users } from '@/lib/db'
+import { getDb, users } from '@/lib/db'
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 
@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user data
+    const db = getDb()
     const user = await db.query.users.findFirst({
       where: eq(users.clerkId, userId),
     })
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
     const { email, firstName, lastName } = await request.json()
 
     // Check if user already exists
+    const db = getDb()
     const existingUser = await db.query.users.findFirst({
       where: eq(users.clerkId, userId),
     })
