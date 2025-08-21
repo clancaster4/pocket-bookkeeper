@@ -1,10 +1,10 @@
-# Pocket Bookkeeper
+# My AI Bookkeeper
 
 An AI-powered bookkeeping chat advisor with a three-tier freemium subscription model designed to help small business owners manage their financial records with confidence and accuracy.
 
 ## 🎯 Overview
 
-Pocket Bookkeeper is a single-page web application that provides instant, accurate guidance on bookkeeping and accounting tasks. It features a three-tier model with different AI capabilities:
+My AI Bookkeeper is a single-page web application that provides instant, accurate guidance on bookkeeping and accounting tasks. It features a three-tier model with different AI capabilities:
 
 - **Free Tier**: 10 queries per month with Standard AI model
 - **Everyday Assistant Tier**: $9.99/month with unlimited queries using Advanced AI

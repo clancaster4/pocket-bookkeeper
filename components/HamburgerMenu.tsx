@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { 
   Menu, 
   X, 
@@ -11,12 +12,14 @@ import {
   BookOpen,
   Home,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react'
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const { isSignedIn } = useUser()
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu when route changes
@@ -24,16 +27,24 @@ export default function HamburgerMenu() {
     setIsOpen(false)
   }, [pathname])
 
-  // Prevent body scroll when menu is open and manage focus
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
+  // Prevent body scroll when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
-      // Focus the menu panel when opened
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          menuRef.current?.focus()
-        }, 150) // Slightly longer delay to ensure transition completes
-      })
     } else {
       document.body.style.overflow = 'unset'
     }
@@ -42,7 +53,7 @@ export default function HamburgerMenu() {
     }
   }, [isOpen])
 
-  const menuItems = [
+  const baseMenuItems = [
     {
       href: '/',
       label: 'Home',
@@ -69,121 +80,98 @@ export default function HamburgerMenu() {
     }
   ]
 
+  const accountMenuItem = {
+    href: '/account',
+    label: 'Manage Account',
+    icon: Settings,
+    description: 'Subscription & account settings'
+  }
+
+  const menuItems = isSignedIn ? [...baseMenuItems, accountMenuItem] : baseMenuItems
+
   return (
     <>
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-neutral-200"
+        className="fixed top-4 left-4 z-50 p-2 bg-white/90 backdrop-blur-sm border border-neutral-200 rounded-lg shadow-lg transition-all hover:shadow-xl hover:scale-105"
         aria-label="Toggle menu"
       >
-        {isOpen ? (
-          <X className="w-6 h-6 text-neutral-700" />
-        ) : (
-          <Menu className="w-6 h-6 text-neutral-700" />
-        )}
+        <div className="relative w-6 h-6">
+          <div className={`absolute inset-0 transition-all duration-200 ${isOpen ? 'rotate-180 opacity-0' : 'rotate-0 opacity-100'}`}>
+            <Menu className="w-6 h-6 text-neutral-700" />
+          </div>
+          <div className={`absolute inset-0 transition-all duration-200 ${isOpen ? 'rotate-0 opacity-100' : 'rotate-180 opacity-0'}`}>
+            <X className="w-6 h-6 text-neutral-700" />
+          </div>
+        </div>
       </button>
 
       {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Slide-out Menu */}
-      <div 
+      {/* Menu Panel */}
+      <div
         ref={menuRef}
-        tabIndex={0}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navigation menu"
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-secondary-500 ${
+        className={`fixed left-0 top-0 h-full w-80 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            setIsOpen(false)
-          }
-        }}
       >
-        <div className="flex flex-col h-full">
+        <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="p-6 border-b border-neutral-200">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold text-neutral-900">Navigation</h2>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-neutral-500" />
-              </button>
-            </div>
-            <p className="text-sm text-neutral-600">Explore Pocket Bookkeeper</p>
+          <div className="p-6 border-b border-neutral-100">
+            <p className="text-sm text-neutral-600">Explore My AI Bookkeeper</p>
           </div>
 
           {/* Menu Items */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <ul className="space-y-2">
-              {menuItems.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
-                
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={`flex items-start space-x-3 p-4 rounded-xl transition-all duration-200 group ${
-                        isActive 
-                          ? 'bg-gradient-to-r from-secondary-50 to-accent-50 border border-secondary-200' 
-                          : 'hover:bg-neutral-50 border border-transparent'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        isActive 
-                          ? 'bg-gradient-to-r from-secondary-500 to-secondary-600' 
-                          : 'bg-neutral-100 group-hover:bg-neutral-200'
-                      }`}>
-                        <Icon className={`w-5 h-5 ${
-                          isActive ? 'text-white' : 'text-neutral-600'
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className={`font-semibold ${
-                            isActive ? 'text-secondary-700' : 'text-neutral-900'
-                          }`}>
-                            {item.label}
-                          </h3>
-                          <ChevronRight className={`w-4 h-4 ${
-                            isActive ? 'text-secondary-500' : 'text-neutral-400'
-                          } group-hover:translate-x-1 transition-transform`} />
-                        </div>
-                        <p className="text-sm text-neutral-600 mt-1">
-                          {item.description}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
+          <nav className="flex-1 p-4 space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`group flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? 'bg-secondary-100 text-secondary-700 shadow-sm'
+                      : 'text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900'
+                  }`}
+                >
+                  <div className={`flex-shrink-0 p-1 rounded-lg transition-colors ${
+                    isActive ? 'bg-secondary-200' : 'group-hover:bg-neutral-100'
+                  }`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium">{item.label}</div>
+                    <div className="text-xs text-neutral-500 truncate">{item.description}</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              )
+            })}
           </nav>
 
           {/* Footer */}
-          <div className="p-6 border-t border-neutral-200 bg-gradient-to-r from-secondary-50 to-accent-50">
+          <div className="p-6 border-t border-neutral-100">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900">Pocket Bookkeeper</h3>
-                <p className="text-xs text-neutral-600">AI-Powered Assistant</p>
+                <h3 className="font-semibold text-neutral-900">My AI Bookkeeper</h3>
+                <p className="text-xs text-neutral-500">Your AI Bookkeeping Assistant</p>
               </div>
             </div>
-            <p className="text-xs text-neutral-500">
-              © 2024 Pocket Bookkeeper. Making bookkeeping accessible for everyone.
+            <p className="text-xs text-neutral-500 leading-relaxed">
+              © 2024 My AI Bookkeeper. Making bookkeeping accessible for everyone.
             </p>
           </div>
         </div>

@@ -415,7 +415,7 @@ export default function PopularUsesPage() {
               Success Stories
             </h2>
             <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-              Real business owners sharing how Pocket Bookkeeper transformed their financial management
+              Real business owners sharing how My AI Bookkeeper transformed their financial management
             </p>
           </div>
 

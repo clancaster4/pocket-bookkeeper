@@ -76,7 +76,7 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
             </div>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
-            Pocket Bookkeeper
+            My AI Bookkeeper
           </h1>
           <p className="text-lg sm:text-xl text-neutral-600 mb-2">
             Your personal AI-powered bookkeeping assistant
@@ -87,15 +87,25 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
               : 'Try it today! No sign-up required for your first 5 messages'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()}`}>
-              <span className="w-2 h-2 rounded-full mr-2" style={{ 
-                backgroundColor: subscription.tier === 'free' && usage.remainingQueries <= 3 ? '#dc2626' : 
-                                subscription.tier !== 'free' ? '#059669' : '#6366f1' 
-              }}></span>
-              {getQueryDisplay()}
-            </div>
+            {/* Show usage indicator only for free users */}
+            {subscription.tier === 'free' && (
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()}`}>
+                <span className="w-2 h-2 rounded-full mr-2" style={{ 
+                  backgroundColor: usage.remainingQueries <= 3 ? '#dc2626' : '#6366f1' 
+                }}></span>
+                {getQueryDisplay()}
+              </div>
+            )}
             
-            {/* Show "Go Unlimited" button only for free users */}
+            {/* Show subscription status for paying users */}
+            {subscription.tier !== 'free' && (
+              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                <span className="w-2 h-2 rounded-full mr-2 bg-green-600"></span>
+                {subscription.tier === 'basic' ? 'Everyday Assistant Active' : 'Elite Advisor Active'}
+              </div>
+            )}
+            
+            {/* Show appropriate upgrade buttons */}
             {subscription.tier === 'free' && (
               <button
                 onClick={() => {
@@ -105,6 +115,19 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
                 className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white text-sm font-medium rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
               >
                 {isSignedIn ? 'Hire your Bookkeeper' : 'Go Unlimited'}
+              </button>
+            )}
+            
+            {/* Show upgrade button for basic users to upgrade to elite */}
+            {subscription.tier === 'basic' && (
+              <button
+                onClick={() => {
+                  setShowSubscriptionModal(true)
+                  onSubscriptionModalChange?.(true)
+                }}
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium rounded-full transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+              >
+                Upgrade your Bookkeeper
               </button>
             )}
           </div>

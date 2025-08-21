@@ -12,5 +12,4 @@ export default defineConfig({
   },
   verbose: true,
   strict: true,
-  tsConfig: './tsconfig.drizzle.json',
 })

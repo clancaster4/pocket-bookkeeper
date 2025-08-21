@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://pocketbookkeeper.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://myaibookkeeper.com'
   const currentDate = new Date().toISOString()
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -9,7 +9,7 @@ export async function GET() {
   <url>
     <loc>${baseUrl}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
@@ -19,7 +19,7 @@ export async function GET() {
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${baseUrl}/support</loc>
+    <loc>${baseUrl}/faq</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

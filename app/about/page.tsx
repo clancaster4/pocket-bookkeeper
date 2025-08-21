@@ -21,8 +21,8 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'About Pocket Bookkeeper - AI Bookkeeping Assistant for Small Business Owners',
-  description: 'Learn how Pocket Bookkeeper helps small business owners manage their books with AI-powered guidance. Save time, reduce costs, and make better financial decisions.',
+  title: 'About My AI Bookkeeper - AI Bookkeeping Assistant for Small Business Owners',
+  description: 'Learn how My AI Bookkeeper helps small business owners manage their books with AI-powered guidance. Save time, reduce costs, and make better financial decisions.',
   keywords: [
     'AI bookkeeping assistant',
     'small business bookkeeping',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     'expense tracking AI'
   ],
   openGraph: {
-    title: 'About Pocket Bookkeeper - AI-Powered Bookkeeping for Small Business',
+    title: 'About My AI Bookkeeper - AI-Powered Bookkeeping for Small Business',
     description: 'Discover how AI technology makes professional bookkeeping accessible and affordable for every small business owner.',
     url: 'https://pocketbookkeeper.com/about',
     type: 'website',
@@ -45,13 +45,13 @@ export const metadata: Metadata = {
         url: 'https://pocketbookkeeper.com/og-about.jpg',
         width: 1200,
         height: 630,
-        alt: 'Pocket Bookkeeper AI Assistant'
+        alt: 'My AI Bookkeeper AI Assistant'
       }
     ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About Pocket Bookkeeper - AI Bookkeeping Assistant',
+    title: 'About My AI Bookkeeper - AI Bookkeeping Assistant',
     description: 'Professional bookkeeping guidance powered by AI. Available 24/7 for small business owners.',
   },
   alternates: {
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Pocket Bookkeeper",
+  "name": "My AI Bookkeeper",
   "applicationCategory": "BusinessApplication",
   "description": "AI-powered bookkeeping assistant for small business owners",
   "offers": {
@@ -103,7 +103,7 @@ export default function AboutPage() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-600 to-accent-600"> Bookkeeping Partner</span>
               </h1>
               <p className="text-xl sm:text-2xl text-neutral-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-                Pocket Bookkeeper transforms how small business owners manage their finances - 
+                My AI Bookkeeper transforms how small business owners manage their finances - 
                 providing instant, expert bookkeeping guidance whenever you need it.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -126,12 +126,12 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* What is Pocket Bookkeeper Section */}
+        {/* What is My AI Bookkeeper Section */}
         <div className="py-16 sm:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
-                What is Pocket Bookkeeper?
+                What is My AI Bookkeeper?
               </h2>
               <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
                 An intelligent assistant that understands your bookkeeping challenges
@@ -141,7 +141,7 @@ export default function AboutPage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
               <div className="prose prose-lg text-neutral-600">
                 <p>
-                  <strong>Pocket Bookkeeper is an AI-powered chat assistant</strong> specifically 
+                  <strong>My AI Bookkeeper is an AI-powered chat assistant</strong> specifically 
                   designed to help small business owners with their bookkeeping and financial 
                   management tasks. Think of it as having a professional bookkeeper available 
                   24/7, ready to answer your questions and guide you through complex financial decisions.
@@ -153,7 +153,7 @@ export default function AboutPage() {
                   your specific situation and industry.
                 </p>
                 <p>
-                  Unlike generic AI tools, Pocket Bookkeeper is trained exclusively on 
+                  Unlike generic AI tools, My AI Bookkeeper is trained exclusively on 
                   bookkeeping, accounting, and small business finance, ensuring accurate, 
                   relevant guidance every time.
                 </p>
@@ -355,14 +355,14 @@ export default function AboutPage() {
                 Perfect for DIY Bookkeeping
               </h2>
               <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-                Integrate Pocket Bookkeeper into your existing workflow - no matter how you manage your books
+                Integrate My AI Bookkeeper into your existing workflow - no matter how you manage your books
               </p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-12 items-start">
               <div>
                 <h3 className="text-2xl font-bold text-neutral-900 mb-6">
-                  How to Integrate Pocket Bookkeeper
+                  How to Integrate My AI Bookkeeper
                 </h3>
                 <div className="space-y-6">
                   <div className="flex items-start space-x-4">
@@ -374,7 +374,7 @@ export default function AboutPage() {
                         Keep Your Current System
                       </h4>
                       <p className="text-neutral-600">
-                        Whether you use QuickBooks, Excel, or paper records, Pocket Bookkeeper 
+                        Whether you use QuickBooks, Excel, or paper records, My AI Bookkeeper 
                         works alongside your existing tools. No need to change everything.
                       </p>
                     </div>
@@ -390,7 +390,7 @@ export default function AboutPage() {
                       </h4>
                       <p className="text-neutral-600">
                         Stuck on categorizing an expense? Unsure about a deduction? 
-                        Just ask Pocket Bookkeeper for instant guidance while you work.
+                        Just ask My AI Bookkeeper for instant guidance while you work.
                       </p>
                     </div>
                   </div>
@@ -490,7 +490,7 @@ export default function AboutPage() {
                   </h3>
                   <p className="text-white/90 mb-4">
                     No credit card required. Get 5 free messages to test how 
-                    Pocket Bookkeeper fits into your workflow.
+                    My AI Bookkeeper fits into your workflow.
                   </p>
                   <Link
                     href="/"

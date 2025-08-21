@@ -232,7 +232,7 @@ export default function ChatInterface({
               <MessageCircle className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-              Welcome to Pocket Bookkeeper!
+              Welcome to My AI Bookkeeper!
             </h2>
             <p className="text-neutral-600">
               I'm your AI bookkeeping assistant. How can I help you today?
@@ -481,6 +481,13 @@ export default function ChatInterface({
           </button>
         </div>
       </div>
+    </div>
+
+    {/* Privacy Note */}
+    <div className="mt-3 text-center">
+      <p className="text-xs text-neutral-500">
+        Please note: For your privacy and security, conversations are <span className="font-bold text-neutral-600">not</span> saved.
+      </p>
     </div>
 
     {/* Click outside to close dropdown - temporarily disabled for debugging */}

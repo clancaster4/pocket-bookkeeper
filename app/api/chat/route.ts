@@ -2,6 +2,135 @@ import { NextRequest, NextResponse } from 'next/server'
 // import { auth } from '@clerk/nextjs/server'
 // import { supabaseAdmin } from '@/lib/supabase'
 
+// Grok API call function
+async function callGrokAPI(message: string, history: any[], model: string, attachments?: any[]): Promise<{ response: string, modelUsed: string }> {
+  try {
+    const grokApiKey = process.env.GROK_API_KEY
+    const grokApiUrl = process.env.GROK_API_URL
+    
+    if (!grokApiKey || !grokApiUrl) {
+      throw new Error('Grok API credentials not configured')
+    }
+
+    // Determine which Grok model to use
+    const grokModel = model === 'premium-ai' 
+      ? process.env.GROK_4_MODEL || 'grok-beta' 
+      : process.env.GROK_3_MINI_MODEL || 'grok-beta'
+
+    // Format conversation history for Grok API
+    const messages = [
+      {
+        role: 'system',
+        content: `You are My AI Bookkeeper, an AI assistant specialized EXCLUSIVELY in accounting, bookkeeping, and finance for small businesses.
+
+STRICT RULES:
+1. You ONLY answer questions related to:
+   - Bookkeeping and accounting
+   - Tax preparation and deductions
+   - Financial management and cash flow
+   - Business expenses and income tracking
+   - Financial software (QuickBooks, Xero, etc.)
+   - Business structure (LLC, S-Corp, etc.)
+   - Payroll and employee finances
+   - Financial reporting and compliance
+   - Invoicing and payments
+
+2. You MUST REFUSE to answer questions about:
+   - Non-financial topics (entertainment, travel, recipes, etc.)
+   - Personal advice unrelated to business finance
+   - Technical/programming help (unless related to accounting software)
+   - Academic homework (unless it's accounting/finance coursework)
+   - Medical, legal (non-tax), or other professional services
+
+3. When refusing off-topic questions, be polite and redirect to financial topics.
+4. Always maintain professional boundaries as a bookkeeping expert.
+5. Provide accurate, helpful financial guidance while staying within your expertise.
+6. Keep responses concise but comprehensive.
+7. Use bullet points and clear formatting when helpful.`
+      },
+      ...history.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      {
+        role: 'user',
+        content: message
+      }
+    ]
+
+    // Make API call to Grok
+    const response = await fetch(grokApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${grokApiKey}`
+      },
+      body: JSON.stringify({
+        model: grokModel,
+        messages: messages,
+        max_tokens: 1500,
+        temperature: 0.7,
+        stream: false
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error(`Grok API error ${response.status}:`, errorData)
+      throw new Error(`Grok API request failed: ${response.status}`)
+    }
+
+    const data = await response.json()
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response format from Grok API')
+    }
+
+    const aiResponse = data.choices[0].message.content
+
+    // Add model identifier to response
+    const modelName = model === 'premium-ai' ? 'Elite AI (Grok-4)' : 'Advanced AI (Grok-3-mini)'
+    const responseWithModel = `${aiResponse}\n\n🤖 **Powered by ${modelName}**: This response was generated using Grok's advanced AI model for superior bookkeeping guidance.`
+
+    return {
+      response: responseWithModel,
+      modelUsed: model
+    }
+
+  } catch (error) {
+    console.error('Grok API call failed:', error)
+    
+    // Fallback to mock response if API fails
+    const fallbackResponse = `⚠️ **AI Service Temporarily Unavailable**
+
+I'm experiencing a temporary connection issue with the advanced AI service. Here's some general bookkeeping guidance:
+
+**Key Bookkeeping Principles:**
+• Separate business and personal finances
+• Keep detailed records of all transactions
+• Reconcile accounts regularly
+• Categorize expenses properly
+• Save receipts and documentation
+
+**Common Business Expense Categories:**
+• Office supplies and materials
+• Business meals (50% deductible)
+• Vehicle/travel expenses
+• Professional services
+• Insurance premiums
+• Equipment and software
+
+**For immediate help:** Please try your question again in a few moments, or contact our support team.
+
+🤖 **Service Status**: Using fallback response due to temporary AI service disruption.`
+
+    return {
+      response: fallbackResponse,
+      modelUsed: 'fallback-ai'
+    }
+  }
+}
+
 // In-memory storage for demo purposes (fallback)
 // In production, use a proper database like PostgreSQL, Redis, or MongoDB
 const ipUsageMap = new Map<string, { count: number, lastReset: Date }>()
@@ -173,7 +302,7 @@ function isTopicValid(message: string): { valid: boolean, reason?: string } {
 }
 
 // System prompt for the AI to enforce topic restrictions
-const SYSTEM_PROMPT = `You are Pocket Bookkeeper, an AI assistant specialized EXCLUSIVELY in accounting, bookkeeping, and finance for small businesses.
+const SYSTEM_PROMPT = `You are My AI Bookkeeper, an AI assistant specialized EXCLUSIVELY in accounting, bookkeeping, and finance for small businesses.
 
 STRICT RULES:
 1. You ONLY answer questions related to:
@@ -200,8 +329,8 @@ STRICT RULES:
 
 5. Provide accurate, helpful financial guidance while staying within your expertise.`
 
-// Mock AI response function with topic restrictions
-async function getAIResponse(message: string, history: any[], model: string = 'standard-ai', attachments?: any[]): Promise<{ response: string, modelUsed: string }> {
+// Call actual Grok API for premium tiers, mock responses for free tier
+async function getAIResponse(message: string, history: any[], model: string = 'standard-ai', attachments?: any[], userTier: string = 'free'): Promise<{ response: string, modelUsed: string }> {
   // First, validate the topic
   const topicValidation = isTopicValid(message)
   
@@ -234,7 +363,7 @@ Please ask me a bookkeeping or finance-related question, and I'll be happy to he
     } else {
       response = `🤔 **Let Me Help With Your Bookkeeping Needs**
 
-I'm Pocket Bookkeeper, your AI assistant for all things accounting and finance. I'm not sure how to help with that particular request, but I'm an expert in business financial management!
+I'm My AI Bookkeeper, your AI assistant for all things accounting and finance. I'm not sure how to help with that particular request, but I'm an expert in business financial management!
 
 **Try asking me about:**
 • 📝 How to track business expenses
@@ -256,8 +385,62 @@ What bookkeeping or financial question can I help you with today?`
     
     return { response, modelUsed: model }
   }
+
+  // Validate subscription tier access
+  if (model === 'advanced-ai' && userTier !== 'basic' && userTier !== 'elite') {
+    return { 
+      response: `🔒 **Upgrade Required for Advanced AI**
+
+The Advanced AI model (Grok-3-mini) is available with the Everyday Assistant subscription tier.
+
+**Available with your subscription:**
+• Standard AI responses
+• Basic bookkeeping guidance
+• 10 queries per month (free tier)
+
+**Upgrade to Everyday Assistant ($9.99/month) for:**
+• Unlimited queries
+• Advanced AI powered by Grok-3-mini
+• Enhanced bookkeeping guidance
+• Faster response times
+
+Would you like to upgrade your subscription?`,
+      modelUsed: 'standard-ai'
+    }
+  }
+
+  if (model === 'premium-ai' && userTier !== 'elite') {
+    return { 
+      response: `🔒 **Upgrade Required for Premium AI**
+
+The Premium AI model (Grok-4) is available with the Elite Advisor subscription tier.
+
+**Available with your subscription:**
+${userTier === 'basic' ? '• Advanced AI powered by Grok-3-mini\n• Unlimited queries\n' : '• Standard AI responses\n• 10 queries per month\n'}
+
+**Upgrade to Elite Advisor ($19.99/month) for:**
+• Premium AI powered by Grok-4
+• Most advanced reasoning and analysis
+• Priority support
+• All Everyday Assistant features
+
+Would you like to upgrade your subscription?`,
+      modelUsed: userTier === 'basic' ? 'advanced-ai' : 'standard-ai'
+    }
+  }
+
+  // Call Grok API for premium models
+  if ((model === 'advanced-ai' && (userTier === 'basic' || userTier === 'elite')) || 
+      (model === 'premium-ai' && userTier === 'elite')) {
+    return await callGrokAPI(message, history, model, attachments)
+  }
   
-  // If topic is valid, continue with normal processing
+  // Free tier: provide mock responses (standard-ai)
+  return await getFreeResponse(message, history, attachments)
+}
+
+// Mock AI response function for free tier users
+async function getFreeResponse(message: string, history: any[], attachments?: any[]): Promise<{ response: string, modelUsed: string }> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
   
@@ -269,7 +452,7 @@ What bookkeeping or financial question can I help you with today?`
   
   // Handle greetings
   if (/^(hi|hello|hey|good morning|good afternoon|good evening)[\s!.,?]*$/i.test(message.trim())) {
-    response = `👋 **Hello! Welcome to Pocket Bookkeeper**
+    response = `👋 **Hello! Welcome to My AI Bookkeeper**
 
 I'm your AI-powered bookkeeping assistant, here to help with all your accounting and financial management needs.
 
@@ -603,16 +786,12 @@ Here's some general bookkeeping guidance:
 Could you provide more specific details about your question? I can give you more targeted advice for your situation!`
   }
   
-  // Add model-specific enhancements for Premium AI
-  if (model === 'premium-ai') {
-    response += `\n\n🤖 **Powered by Premium AI**: This response was generated using our most advanced AI model for superior reasoning and comprehensive guidance.`
-  } else {
-    response += `\n\n🤖 **Powered by Standard AI**: This response was generated using our standard AI model.`
-  }
+  // Add model identifier for free tier
+  response += `\n\n🤖 **Powered by Standard AI**: This response was generated using our basic AI model. Upgrade to Everyday Assistant or Elite Advisor for advanced AI capabilities.`
   
   return {
     response,
-    modelUsed: model
+    modelUsed: 'standard-ai'
   }
 }
 
@@ -710,8 +889,20 @@ export async function POST(request: NextRequest) {
       modelToUse = 'advanced-ai'
     }
 
+    // Get user subscription tier (mock implementation for now)
+    // In production, get this from database based on userId
+    let userTier = 'free' // Default to free tier
+    
+    // Mock tier determination based on aiModel selection
+    // In production, this should come from actual subscription database
+    if (aiModel === 'elite') {
+      userTier = 'elite' // Only allow if user actually has elite subscription
+    } else if (aiModel === 'everyday') {
+      userTier = 'basic' // Only allow if user actually has basic subscription
+    }
+
     // Get AI response
-    const { response, modelUsed } = await getAIResponse(message, limitedHistory, modelToUse, attachments)
+    const { response, modelUsed } = await getAIResponse(message, limitedHistory, modelToUse, attachments, userTier)
 
     // Log the interaction for analytics (no personal data stored)
     console.log(`Chat interaction: IP=${clientIP.slice(0, 8)}***, Model=${modelUsed}, Message length=${message.length}, Response length=${response.length}, Attachments=${attachments?.length || 0}, Remaining queries=${usageCheck.remaining}`)

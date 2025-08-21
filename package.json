@@ -1,7 +1,7 @@
 {
-  "name": "pocket-bookkeeper",
+  "name": "my-ai-bookkeeper",
   "version": "1.0.0",
-  "description": "AI-powered bookkeeping chat advisor for small business owners",
+  "description": "My AI Bookkeeper - AI-powered bookkeeping chat advisor for small business owners",
   "private": true,
   "scripts": {
     "dev": "next dev",

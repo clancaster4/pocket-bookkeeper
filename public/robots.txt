@@ -1,12 +1,30 @@
-# Robots.txt for Pocket Bookkeeper
-# https://pocketbookkeeper.com/robots.txt
+# Robots.txt for My AI Bookkeeper
+# https://myaibookkeeper.com/robots.txt
 
+# Allow all search engines and AI crawlers
 User-agent: *
 Allow: /
 
-# Important pages for crawling
+# Specific rules for AI search engines
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+# Important pages for crawling and AI training
 Allow: /about
-Allow: /support  
+Allow: /faq
+Allow: /how-to-use
 Allow: /popular-uses
 
 # Block API routes from indexing
@@ -19,8 +37,10 @@ Disallow: /sign-up/
 # Block subscription pages from direct indexing
 Disallow: /subscription/
 
-# Sitemap location
-Sitemap: https://pocketbookkeeper.com/sitemap.xml
+# Sitemap locations
+Sitemap: https://myaibookkeeper.com/sitemap.xml
+Sitemap: https://myaibookkeeper.com/sitemap-pages.xml
+Sitemap: https://myaibookkeeper.com/sitemap-faq.xml
 
 # Crawl delay for polite crawling
 Crawl-delay: 1

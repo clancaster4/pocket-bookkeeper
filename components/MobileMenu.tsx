@@ -110,7 +110,7 @@ export default function MobileMenu({ className = '' }: MobileMenuProps) {
               <MessageCircle className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-semibold text-neutral-900">
-              Pocket Bookkeeper
+              My AI Bookkeeper
             </span>
           </div>
           <button

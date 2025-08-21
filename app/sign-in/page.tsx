@@ -64,7 +64,7 @@ export default function SignInPage() {
             <LogIn className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to your Pocket Bookkeeper account</p>
+          <p className="text-gray-400">Sign in to your My AI Bookkeeper account</p>
         </div>
 
         {/* Sign In Form */}

@@ -30,13 +30,13 @@ import {
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Use Pocket Bookkeeper for Small Business Bookkeeping",
+  "name": "How to Use My AI Bookkeeper for Small Business Bookkeeping",
   "description": "Complete guide on using AI-powered bookkeeping assistant for small business financial management",
   "step": [
     {
       "@type": "HowToStep",
       "name": "Start a conversation",
-      "text": "Open Pocket Bookkeeper and type your bookkeeping question"
+      "text": "Open My AI Bookkeeper and type your bookkeeping question"
     },
     {
       "@type": "HowToStep",
@@ -221,7 +221,7 @@ export default function HowToUseClientPage() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-600 to-accent-600"> AI Guidance</span>
               </h1>
               <p className="text-xl sm:text-2xl text-neutral-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-                Learn how to use Pocket Bookkeeper effectively with real examples, 
+                Learn how to use My AI Bookkeeper effectively with real examples, 
                 screenshots, and proven prompts that get results.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -314,7 +314,7 @@ export default function HowToUseClientPage() {
                 See It In Action
               </h2>
               <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-                Visual examples of how Pocket Bookkeeper helps with real bookkeeping tasks
+                Visual examples of how My AI Bookkeeper helps with real bookkeeping tasks
               </p>
             </div>
 
@@ -513,7 +513,7 @@ export default function HowToUseClientPage() {
                 Best Practices for Maximum Value
               </h2>
               <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-                Follow these tips to get the most out of Pocket Bookkeeper
+                Follow these tips to get the most out of My AI Bookkeeper
               </p>
             </div>
 
@@ -577,7 +577,7 @@ export default function HowToUseClientPage() {
                 Works With Your Existing Tools
               </h2>
               <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
-                Pocket Bookkeeper complements your current bookkeeping workflow
+                My AI Bookkeeper complements your current bookkeeping workflow
               </p>
             </div>
 

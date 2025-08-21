@@ -27,10 +27,10 @@ const structuredData = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is Pocket Bookkeeper?",
+      "name": "What is My AI Bookkeeper?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pocket Bookkeeper is an AI-powered bookkeeping assistant designed specifically for small business owners. It provides instant, accurate guidance on accounting tasks, tax questions, expense tracking, and financial management – available 24/7 at a fraction of the cost of traditional bookkeeping services."
+        "text": "My AI Bookkeeper is an AI-powered bookkeeping assistant designed specifically for small business owners. It provides instant, accurate guidance on accounting tasks, tax questions, expense tracking, and financial management – available 24/7 at a fraction of the cost of traditional bookkeeping services."
       }
     },
     {
@@ -63,8 +63,8 @@ const faqs: FAQItem[] = [
   {
     id: 'what-is-pocket-bookkeeper',
     category: 'general',
-    question: 'What is Pocket Bookkeeper?',
-    answer: 'Pocket Bookkeeper is an AI-powered bookkeeping assistant designed specifically for small business owners. It provides instant, accurate guidance on accounting tasks, tax questions, expense tracking, and financial management – available 24/7 at a fraction of the cost of traditional bookkeeping services.'
+    question: 'What is My AI Bookkeeper?',
+    answer: 'My AI Bookkeeper is an AI-powered bookkeeping assistant designed specifically for small business owners. It provides instant, accurate guidance on accounting tasks, tax questions, expense tracking, and financial management – available 24/7 at a fraction of the cost of traditional bookkeeping services.'
   },
   {
     id: 'how-accurate-is-ai',
@@ -124,7 +124,7 @@ const faqs: FAQItem[] = [
     id: 'tax-filing',
     category: 'features',
     question: 'Does this replace my tax preparer?',
-    answer: 'Pocket Bookkeeper helps you organize your finances and identify deductions throughout the year, making tax time much easier. However, for actual tax filing, we recommend working with a qualified tax professional who can use the organized information we\'ve helped you compile.'
+    answer: 'My AI Bookkeeper helps you organize your finances and identify deductions throughout the year, making tax time much easier. However, for actual tax filing, we recommend working with a qualified tax professional who can use the organized information we\'ve helped you compile.'
   },
   {
     id: 'industry-specific',
@@ -204,7 +204,7 @@ export default function FAQPage() {
               Frequently Asked Questions
             </h1>
             <p className="text-xl text-neutral-600 mb-8">
-              Find answers to common questions about Pocket Bookkeeper.
+              Find answers to common questions about My AI Bookkeeper.
             </p>
             
             {/* Search Bar */}
@@ -232,7 +232,7 @@ export default function FAQPage() {
                 Frequently Asked Questions
               </h2>
               <p className="text-lg text-neutral-600">
-                Quick answers to the most common questions about Pocket Bookkeeper
+                Quick answers to the most common questions about My AI Bookkeeper
               </p>
             </div>
 
