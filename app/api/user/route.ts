@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb, users } from '@/lib/db'
 import { auth } from '@clerk/nextjs/server'
-import { eq } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,14 +8,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user data
-    const db = getDb()
-    const user = await db.query.users.findFirst({
-      where: eq(users.clerkId, userId),
-    })
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    // Mock user data for now - will be replaced with database later
+    const user = {
+      id: userId,
+      clerkId: userId,
+      email: 'user@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      tier: 'free',
+      queryCount: 0,
+      queryLimit: 5,
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
 
     return NextResponse.json(user)
@@ -39,26 +41,19 @@ export async function POST(request: NextRequest) {
 
     const { email, firstName, lastName } = await request.json()
 
-    // Check if user already exists
-    const db = getDb()
-    const existingUser = await db.query.users.findFirst({
-      where: eq(users.clerkId, userId),
-    })
-
-    if (existingUser) {
-      return NextResponse.json({ message: 'User already exists', user: existingUser })
-    }
-
-    // Create new user
-    const [newUser] = await db.insert(users).values({
+    // Mock user creation - will be replaced with database later
+    const newUser = {
+      id: userId,
       clerkId: userId,
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
+      email: email || 'user@example.com',
+      firstName: firstName || 'John',
+      lastName: lastName || 'Doe',
       tier: 'free',
       queryCount: 0,
       queryLimit: 5,
-    }).returning()
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
 
     return NextResponse.json(newUser)
   } catch (error) {
