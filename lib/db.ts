@@ -3,7 +3,7 @@ import { Pool } from '@neondatabase/serverless'
 import * as schema from './schema'
 
 // Lazy database connection
-let db: ReturnType<typeof drizzle> | null = null
+let db: ReturnType<typeof drizzle<typeof schema>> | null = null
 
 export function getDb() {
   if (!db) {
