@@ -127,7 +127,7 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
             )}
             
             {/* Show subscription status for paying users */}
-            {subscription.tier !== 'free' && (
+            {subscription.tier !== 'free' && subscription.status === 'active' && (
               <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
                 <span className="w-2 h-2 rounded-full mr-2 bg-green-600"></span>
                 {subscription.tier === 'basic' ? 'Everyday Assistant Active' : 'Elite Advisor Active'}

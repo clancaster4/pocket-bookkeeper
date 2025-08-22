@@ -45,13 +45,14 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-secondary-50 via-white to-accent-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-neutral-100/30"></div>
+      <div className="relative z-10 w-full max-w-md">
         {/* Back to Home */}
         <div className="mb-8">
           <Link 
             href="/"
-            className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center space-x-2 text-neutral-600 hover:text-neutral-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
@@ -60,31 +61,31 @@ export default function SignInPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-black/50 border border-gray-700">
+          <div className="w-16 h-16 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-secondary-500/25">
             <LogIn className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to your My AI Bookkeeper account</p>
+          <h1 className="text-3xl font-bold text-neutral-900 mb-2">Welcome Back</h1>
+          <p className="text-neutral-600">Sign in to your My AI Bookkeeper account</p>
         </div>
 
         {/* Sign In Form */}
-        <div className="bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 p-8">
+        <div className="bg-white rounded-2xl shadow-2xl border border-neutral-200 p-8">
           <form onSubmit={handleSignIn} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-500" />
+                  <Mail className="h-5 w-5 text-neutral-500" />
                 </div>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 bg-black border border-gray-700 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-colors text-white placeholder-gray-500"
+                  className="block w-full pl-10 pr-3 py-3 bg-neutral-50 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 transition-colors text-neutral-900 placeholder-neutral-500"
                   placeholder="Enter your email"
                   required
                 />
@@ -93,19 +94,19 @@ export default function SignInPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-500" />
+                  <Lock className="h-5 w-5 text-neutral-500" />
                 </div>
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-3 bg-black border border-gray-700 rounded-xl focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-colors text-white placeholder-gray-500"
+                  className="block w-full pl-10 pr-12 py-3 bg-neutral-50 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 transition-colors text-neutral-900 placeholder-neutral-500"
                   placeholder="Enter your password"
                   required
                 />
@@ -115,9 +116,9 @@ export default function SignInPage() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-500 hover:text-gray-300" />
+                    <EyeOff className="h-5 w-5 text-neutral-500 hover:text-neutral-700" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-500 hover:text-gray-300" />
+                    <Eye className="h-5 w-5 text-neutral-500 hover:text-neutral-700" />
                   )}
                 </button>
               </div>
@@ -125,8 +126,8 @@ export default function SignInPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-900/20 border border-red-800 rounded-xl p-3">
-                <p className="text-sm text-red-400">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
@@ -134,11 +135,11 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-white hover:bg-gray-100 text-black font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+              className="w-full bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-secondary-500/25 hover:shadow-xl hover:shadow-secondary-500/30 transform hover:scale-105 active:scale-95"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Signing In...</span>
                 </div>
               ) : (
@@ -151,13 +152,13 @@ export default function SignInPage() {
           </form>
 
           {/* Footer Links */}
-          <div className="mt-6 pt-6 border-t border-gray-800">
+          <div className="mt-6 pt-6 border-t border-neutral-200">
             <div className="text-center">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-neutral-600">
                 Don't have an account?{' '}
                 <button 
                   onClick={() => setShowSubscriptionModal(true)}
-                  className="text-white hover:text-gray-300 font-medium transition-colors"
+                  className="text-secondary-600 hover:text-secondary-700 font-medium transition-colors"
                 >
                   Sign up for a subscription
                 </button>
