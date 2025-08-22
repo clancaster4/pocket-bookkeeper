@@ -158,12 +158,22 @@ export default function Home() {
       })
 
       console.log('API response status:', response.status)
-
-      const data = await response.json()
-      console.log('API response data:', data)
+      console.log('API response headers:', response.headers)
 
       if (!response.ok) {
-        if (response.status === 401 && data.details?.requiresAuth) {
+        // Try to get error details
+        let errorData
+        try {
+          errorData = await response.json()
+          console.log('API error response data:', errorData)
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+          const textResponse = await response.text()
+          console.log('API error response text:', textResponse)
+          throw new Error(`API error ${response.status}: ${textResponse || 'Unknown error'}`)
+        }
+
+        if (response.status === 401 && errorData.details?.requiresAuth) {
           // Handle account required - redirect to sign up
           window.location.href = '/sign-up'
           return
@@ -173,8 +183,11 @@ export default function Home() {
           setShowLimitExceededModal(true)
           return
         }
-        throw new Error(data.error || 'Failed to send message')
+        throw new Error(errorData.error || errorData.details?.message || `API error ${response.status}`)
       }
+
+      const data = await response.json()
+      console.log('API success response data:', data)
 
       // Add user message
       const userMessage: Message = {
@@ -227,7 +240,8 @@ export default function Home() {
 
     } catch (error) {
       console.error('Error sending message:', error)
-      alert('Failed to send message. Please try again.')
+      console.error('Error details:', error instanceof Error ? error.message : error)
+      alert(`Failed to send message. Error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       setIsLoading(false)
     }
