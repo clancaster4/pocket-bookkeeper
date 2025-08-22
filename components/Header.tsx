@@ -67,6 +67,8 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
                     avatarBox: "w-8 h-8"
                   }
                 }}
+                userProfileUrl="/subscription-manage"
+                userProfileMode="navigation"
               />
             </div>
           ) : (

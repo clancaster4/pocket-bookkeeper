@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import Stripe from 'stripe'
+import { getDb } from '@/lib/db'
+import { users } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
@@ -17,57 +20,100 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
-    const { subscriptionId, cancelAt = 'immediately' } = body
+    // Get user details
+    const user = await clerkClient.users.getUser(userId)
+    const userEmail = user.emailAddresses[0]?.emailAddress
 
-    if (!subscriptionId) {
+    if (!userEmail) {
       return NextResponse.json(
-        { error: 'Subscription ID is required' },
+        { error: 'User email not found' },
         { status: 400 }
       )
     }
 
-    // Retrieve subscription to verify ownership
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    
-    if (!subscription) {
+    const body = await request.json()
+    const { cancelAt = 'period_end' } = body
+
+    let canceledSubscriptions = []
+
+    // Find and cancel all active Stripe subscriptions
+    try {
+      const customers = await stripe.customers.list({
+        email: userEmail,
+        limit: 10
+      })
+
+      for (const customer of customers.data) {
+        const subscriptions = await stripe.subscriptions.list({
+          customer: customer.id,
+          status: 'active'
+        })
+
+        for (const subscription of subscriptions.data) {
+          let canceledSub
+
+          if (cancelAt === 'immediately') {
+            // Cancel immediately
+            canceledSub = await stripe.subscriptions.cancel(subscription.id)
+          } else {
+            // Cancel at end of current billing period (default)
+            canceledSub = await stripe.subscriptions.update(subscription.id, {
+              cancel_at_period_end: true
+            })
+          }
+
+          canceledSubscriptions.push({
+            id: canceledSub.id,
+            status: canceledSub.status,
+            cancel_at_period_end: canceledSub.cancel_at_period_end,
+            current_period_end: canceledSub.current_period_end,
+            canceled_at: canceledSub.canceled_at
+          })
+
+          console.log(`Subscription ${cancelAt === 'immediately' ? 'canceled' : 'scheduled for cancellation'}: ${subscription.id} for user ${userId}`)
+        }
+      }
+    } catch (stripeError) {
+      console.error('Error canceling Stripe subscriptions:', stripeError)
       return NextResponse.json(
-        { error: 'Subscription not found' },
+        { error: 'Failed to cancel subscription. Please contact support.' },
+        { status: 500 }
+      )
+    }
+
+    if (canceledSubscriptions.length === 0) {
+      return NextResponse.json(
+        { error: 'No active subscriptions found' },
         { status: 404 }
       )
     }
 
-    let canceledSubscription
-
+    // If canceling immediately, update user database record to free tier
     if (cancelAt === 'immediately') {
-      // Cancel immediately
-      canceledSubscription = await stripe.subscriptions.cancel(subscriptionId)
-    } else if (cancelAt === 'period_end') {
-      // Cancel at end of current billing period
-      canceledSubscription = await stripe.subscriptions.update(subscriptionId, {
-        cancel_at_period_end: true
-      })
-    } else {
-      return NextResponse.json(
-        { error: 'Invalid cancellation type' },
-        { status: 400 }
-      )
-    }
+      try {
+        const db = getDb()
+        await db.update(users)
+          .set({
+            tier: 'free',
+            subscriptionStatus: 'canceled',
+            queryCount: 0,
+            queryLimit: 5,
+            updatedAt: new Date()
+          })
+          .where(eq(users.clerkId, userId))
 
-    // Log cancellation for analytics
-    console.log(`Subscription canceled: ${subscriptionId} for user: ${userId}, type: ${cancelAt}`)
+        console.log(`Updated user ${userId} to free tier after immediate cancellation`)
+      } catch (dbError) {
+        console.error('Error updating user in database:', dbError)
+        // Continue even if DB update fails - Stripe cancellation is most important
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      subscription: {
-        id: canceledSubscription.id,
-        status: canceledSubscription.status,
-        cancel_at_period_end: canceledSubscription.cancel_at_period_end,
-        current_period_end: canceledSubscription.current_period_end,
-        canceled_at: canceledSubscription.canceled_at
-      },
+      canceledSubscriptions,
       message: cancelAt === 'immediately' 
-        ? 'Your subscription has been canceled immediately. You still have access until the end of your current billing period.'
+        ? 'Your subscription has been canceled immediately. You now have 5 free messages to use.'
         : 'Your subscription will be canceled at the end of your current billing period. You can reactivate it anytime before then.'
     })
 
@@ -88,7 +134,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check cancellation status
+// GET endpoint to check subscription status
 export async function GET(request: NextRequest) {
   try {
     const { userId } = auth()
@@ -100,26 +146,56 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const subscriptionId = searchParams.get('subscription_id')
+    // Get user details
+    const user = await clerkClient.users.getUser(userId)
+    const userEmail = user.emailAddresses[0]?.emailAddress
 
-    if (!subscriptionId) {
+    if (!userEmail) {
       return NextResponse.json(
-        { error: 'Subscription ID is required' },
+        { error: 'User email not found' },
         { status: 400 }
       )
     }
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    let activeSubscriptions = []
+
+    // Find all active subscriptions
+    try {
+      const customers = await stripe.customers.list({
+        email: userEmail,
+        limit: 10
+      })
+
+      for (const customer of customers.data) {
+        const subscriptions = await stripe.subscriptions.list({
+          customer: customer.id,
+          status: 'all'
+        })
+
+        for (const subscription of subscriptions.data) {
+          if (subscription.status === 'active' || subscription.cancel_at_period_end) {
+            activeSubscriptions.push({
+              id: subscription.id,
+              status: subscription.status,
+              cancel_at_period_end: subscription.cancel_at_period_end,
+              current_period_end: subscription.current_period_end,
+              canceled_at: subscription.canceled_at,
+              plan_name: subscription.items.data[0]?.price?.nickname || 'Unknown Plan'
+            })
+          }
+        }
+      }
+    } catch (stripeError) {
+      console.error('Error fetching subscription status:', stripeError)
+      return NextResponse.json(
+        { error: 'Failed to fetch subscription status' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
-      subscription: {
-        id: subscription.id,
-        status: subscription.status,
-        cancel_at_period_end: subscription.cancel_at_period_end,
-        current_period_end: subscription.current_period_end,
-        canceled_at: subscription.canceled_at
-      }
+      subscriptions: activeSubscriptions,
+      hasActiveSubscription: activeSubscriptions.length > 0
     })
 
   } catch (error) {

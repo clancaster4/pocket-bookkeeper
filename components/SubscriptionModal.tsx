@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, X, Crown, Zap, Star, Sparkles } from 'lucide-react'
+import { Check, X, Crown, Zap, Star, Sparkles, AlertTriangle } from 'lucide-react'
 import { loadStripe } from '@stripe/stripe-js'
 import { useUser, useClerk } from '@clerk/nextjs'
 
@@ -16,6 +16,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [selectedPlan, setSelectedPlan] = useState('basic-helper')
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const { isSignedIn } = useUser()
   const { openSignUp } = useClerk()
 
@@ -34,6 +35,8 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
     }
 
     setIsLoading(true)
+    setErrorMessage('') // Clear any previous error messages
+    
     try {
       // Create checkout session
       const response = await fetch('/api/create-checkout-session', {
@@ -50,6 +53,13 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
 
       if (!response.ok) {
         console.error('Checkout session error:', responseData)
+        
+        // Handle specific error for already subscribed
+        if (response.status === 409 && responseData.error) {
+          setErrorMessage(responseData.error)
+          return
+        }
+        
         throw new Error(responseData.error || 'Failed to create checkout session')
       }
 
@@ -63,7 +73,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
       }
     } catch (error) {
       console.error('Subscription error:', error)
-      alert(`There was an error processing your subscription: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
+      setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -79,6 +89,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId)
+    setErrorMessage('') // Clear error when changing plans
   }
 
   if (!isOpen) return null
@@ -236,6 +247,26 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
               </div>
             </div>
           </div>
+
+          {/* Error message */}
+          {errorMessage && (
+            <div className="mt-6 p-4 bg-red-100 border border-red-200 rounded-xl">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-800 font-medium">{errorMessage}</p>
+                </div>
+                <button
+                  onClick={() => setErrorMessage('')}
+                  className="ml-auto flex-shrink-0 -mr-1 -mt-1 p-1 hover:bg-red-200 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-8">

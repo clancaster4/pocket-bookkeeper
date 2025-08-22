@@ -94,6 +94,8 @@ export default function UserProfile() {
               avatarBox: "w-10 h-10 rounded-2xl shadow-lg",
             }
           }}
+          userProfileUrl="/subscription-manage"
+          userProfileMode="navigation"
         />
       </div>
 
