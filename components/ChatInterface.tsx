@@ -211,11 +211,21 @@ export default function ChatInterface({
           ))}
         
         {isLoading && (
-          <div className="flex items-center space-x-2 text-neutral-500 p-4">
-            <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" />
-            <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-            <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-            <span className="text-sm">AI is analyzing your message...</span>
+          <div className="flex items-start space-x-3 max-w-[85%]">
+            {/* AI Avatar */}
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-accent-500 to-accent-600 flex items-center justify-center shadow-lg">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            
+            {/* Typing Indicator */}
+            <div className="bg-gradient-to-r from-neutral-50 to-neutral-100 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm border border-neutral-200">
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-accent-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-accent-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-accent-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+              <div className="text-xs text-neutral-500 mt-1 animate-pulse">AI is thinking...</div>
+            </div>
           </div>
         )}
         
