@@ -1125,10 +1125,35 @@ export async function GET(request: NextRequest) {
       })
     }
     
+    // Get user info including tier
+    const db = getDb()
+    const userInfo = await db.query.users.findFirst({
+      where: eq(users.clerkId, userId),
+    })
+    
+    if (!userInfo) {
+      // User not found, return free tier defaults
+      return NextResponse.json({
+        userId: userId,
+        authenticated: true,
+        usage: {
+          count: 0,
+          remaining: 5,
+          limit: 5,
+          resetTime: new Date().toISOString(),
+          requiresAuth: false
+        },
+        subscription: {
+          tier: 'free',
+          status: 'active'
+        }
+      })
+    }
+    
     let usageInfo: { count: number, remaining: number, resetTime: Date }
     
     // Use user-based tracking for authenticated users
-    usageInfo = await getUsageInfo(userId, 5)
+    usageInfo = await getUsageInfo(userId, userInfo.queryLimit)
     
     return NextResponse.json({
       userId: userId,
@@ -1136,9 +1161,13 @@ export async function GET(request: NextRequest) {
       usage: {
         count: usageInfo.count,
         remaining: usageInfo.remaining,
-        limit: usageInfo.remaining === -1 ? 'unlimited' : 5,
+        limit: userInfo.queryLimit,
         resetTime: usageInfo.resetTime.toISOString(),
         requiresAuth: false
+      },
+      subscription: {
+        tier: userInfo.tier,
+        status: userInfo.subscriptionStatus
       }
     })
   } catch (error) {

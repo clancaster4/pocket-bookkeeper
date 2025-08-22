@@ -26,8 +26,10 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
       return 'Create account for 5 free messages'
     } else if (subscription.tier === 'free') {
       return `${usage.remainingQueries} messages remaining`
-    } else if (subscription.tier === 'basic' || subscription.tier === 'elite') {
-      return 'Unlimited messages'
+    } else if (subscription.tier === 'basic') {
+      return 'Everyday Assistant'
+    } else if (subscription.tier === 'elite') {
+      return 'Elite Advisor'
     } else {
       return `${usage.remainingQueries} messages remaining`
     }

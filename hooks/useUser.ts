@@ -6,7 +6,7 @@ import { useAppStore } from '@/lib/store'
 
 export function useUser() {
   const { user: clerkUser, isLoaded: clerkLoaded, isSignedIn } = useClerkUser()
-  const { setUser, setLoading, setAuthenticated, updateUsage } = useAppStore()
+  const { setUser, setLoading, setAuthenticated, updateUsage, updateSubscription } = useAppStore()
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -30,6 +30,11 @@ export function useUser() {
             usageData.usage.limit,
             usageData.usage.requiresAuth || false
           )
+          
+          // Update subscription info if available
+          if (usageData.subscription) {
+            updateSubscription(usageData.subscription.tier, usageData.subscription.status)
+          }
         } else if (usageResponse.status === 401) {
           // Not authenticated - set requiresAuth to true
           console.log('useUser: User not authenticated')
