@@ -182,7 +182,7 @@ export default function ChatInterface({
   return (
     <div className={`flex flex-col bg-white shadow-lg border border-neutral-200 transition-all duration-300 ${
       shouldExpand 
-        ? 'fixed inset-0 w-full h-full z-50 rounded-none sm:inset-2 sm:rounded-lg sm:h-[calc(100vh-1rem)]' 
+        ? 'fixed inset-0 w-full h-full z-50 rounded-none' 
         : 'relative max-w-4xl mx-auto w-full h-[60vh] min-h-[500px] z-20 rounded-lg'
     }`} style={{ pointerEvents: 'auto' }}>
       {/* Minimize/Maximize Button - Always show */}
