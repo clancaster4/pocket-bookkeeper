@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 // import { supabaseAdmin } from '@/lib/supabase'
 
 // Grok API call function
@@ -198,9 +198,11 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
   console.log(`checkAndUpdateUsage called for userId: ${userId}, limit: ${limit}`)
   
   try {
+    console.log(`checkAndUpdateUsage: Getting database connection`)
     const db = getDb()
     
     // Check if user exists in database
+    console.log(`checkAndUpdateUsage: Querying for user with clerkId: ${userId}`)
     const existingUser = await db.query.users.findFirst({
       where: eq(users.clerkId, userId),
     })
@@ -214,10 +216,15 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
     
     if (!existingUser) {
       console.log('User not found in database, creating new user')
+      
+      // Get the current user from Clerk to get email
+      const clerkUser = await currentUser()
+      const userEmail = clerkUser?.emailAddresses?.[0]?.emailAddress || 'user@example.com'
+      
       // Create new user with default free tier settings
       const newUser: NewUser = {
         clerkId: userId,
-        email: 'user@example.com', // Will be updated by webhook or user profile
+        email: userEmail,
         tier: 'free',
         queryCount: 1,
         queryLimit: 5,
@@ -226,6 +233,7 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
       
       try {
         await db.insert(users).values(newUser)
+        console.log('Successfully created new user:', { clerkId: userId, email: userEmail })
         return { allowed: true, remaining: 4, resetTime: now }
       } catch (error) {
         console.error('Error creating new user:', error)
@@ -922,12 +930,14 @@ export async function POST(request: NextRequest) {
 
     // Get authentication info
     const { userId } = auth()
+    console.log('Chat API called - userId:', userId ? 'authenticated' : 'not authenticated')
     
     let usageCheck: { allowed: boolean, remaining: number, resetTime: Date }
     let clientIP = 'unknown'
     
     // Check if user is authenticated
     if (!userId) {
+      console.log('Chat API: User not authenticated, returning 401')
       // For unauthenticated users, deny access and require account creation
       return NextResponse.json(
         { 
@@ -942,9 +952,20 @@ export async function POST(request: NextRequest) {
     }
     
     // For authenticated users, check usage limit
-    usageCheck = await checkAndUpdateUsage(userId, 5)
+    console.log('Chat API: Checking usage for authenticated user:', userId)
+    try {
+      usageCheck = await checkAndUpdateUsage(userId, 5)
+      console.log('Chat API: Usage check result:', { allowed: usageCheck.allowed, remaining: usageCheck.remaining })
+    } catch (error) {
+      console.error('Chat API: Error during usage check:', error)
+      return NextResponse.json(
+        { error: 'Database error during usage check', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
     
     if (!usageCheck.allowed) {
+      console.log('Chat API: Usage limit exceeded for user:', userId)
       return NextResponse.json(
         { 
           error: 'Free message limit exceeded',
