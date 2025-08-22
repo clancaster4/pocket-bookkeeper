@@ -151,12 +151,16 @@ function getClientIP(request: NextRequest): string {
   return request.ip || 'unknown'
 }
 
-// Check and update usage for an IP address using database persistence
+// Temporary in-memory fallback for IP tracking
+const ipUsageMap = new Map<string, { count: number, resetTime: Date }>()
+
+// Check and update usage for an IP address using database persistence with fallback
 async function checkAndUpdateUsage(ip: string, limit: number = 5): Promise<{ allowed: boolean, remaining: number, resetTime: Date }> {
-  const db = getDb()
   const now = new Date()
   
   try {
+    const db = getDb()
+    
     // Check if IP exists in database
     const existingUsage = await db.query.ipUsage.findFirst({
       where: eq(ipUsage.ipAddress, ip),
@@ -197,18 +201,30 @@ async function checkAndUpdateUsage(ip: string, limit: number = 5): Promise<{ all
       resetTime: existingUsage.firstUsed 
     }
   } catch (error) {
-    console.error('Database error in checkAndUpdateUsage:', error)
-    // Fallback to allow request if database fails
-    return { allowed: true, remaining: 4, resetTime: now }
+    console.error('Database error in checkAndUpdateUsage, using fallback:', error)
+    
+    // Fallback to in-memory tracking
+    const existing = ipUsageMap.get(ip)
+    if (!existing) {
+      ipUsageMap.set(ip, { count: 1, resetTime: now })
+      return { allowed: true, remaining: limit - 1, resetTime: now }
+    }
+    
+    if (existing.count >= limit) {
+      return { allowed: false, remaining: 0, resetTime: existing.resetTime }
+    }
+    
+    existing.count++
+    return { allowed: true, remaining: limit - existing.count, resetTime: existing.resetTime }
   }
 }
 
-// Get usage info for an IP address using database
+// Get usage info for an IP address using database with fallback
 async function getUsageInfo(ip: string, limit: number = 5): Promise<{ count: number, remaining: number, resetTime: Date }> {
-  const db = getDb()
   const now = new Date()
   
   try {
+    const db = getDb()
     const existingUsage = await db.query.ipUsage.findFirst({
       where: eq(ipUsage.ipAddress, ip),
     })
@@ -223,8 +239,19 @@ async function getUsageInfo(ip: string, limit: number = 5): Promise<{ count: num
       resetTime: existingUsage.firstUsed 
     }
   } catch (error) {
-    console.error('Database error in getUsageInfo:', error)
-    return { count: 0, remaining: limit, resetTime: now }
+    console.error('Database error in getUsageInfo, using fallback:', error)
+    
+    // Fallback to in-memory tracking
+    const existing = ipUsageMap.get(ip)
+    if (!existing) {
+      return { count: 0, remaining: limit, resetTime: now }
+    }
+    
+    return { 
+      count: existing.count, 
+      remaining: Math.max(0, limit - existing.count), 
+      resetTime: existing.resetTime 
+    }
   }
 }
 
@@ -944,8 +971,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Chat API error:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
