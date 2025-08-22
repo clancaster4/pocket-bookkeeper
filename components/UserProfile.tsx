@@ -88,6 +88,7 @@ export default function UserProfile() {
 
         {/* User button */}
         <UserButton 
+          afterSignOutUrl="/"
           appearance={{
             elements: {
               avatarBox: "w-10 h-10 rounded-2xl shadow-lg",

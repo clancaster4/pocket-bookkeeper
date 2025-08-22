@@ -33,7 +33,7 @@ export default function LimitExceededModal({ isOpen, onClose, onUpgrade }: Limit
         {/* Content */}
         <div className="p-6">
           <p className="text-neutral-600 mb-6 leading-relaxed">
-            You have exceeded your free message limit. Please upgrade to a paid plan for unlimited access.
+            You have used all 5 free messages. Please upgrade to a paid plan for unlimited access.
           </p>
 
           {/* Benefits */}

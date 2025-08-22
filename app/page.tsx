@@ -5,6 +5,7 @@ import { Menu, Calculator, BookOpen, DollarSign, MessageCircle, Copy, CheckCircl
 import { useUser, SignInButton, UserButton } from '@clerk/nextjs'
 import Header from '@/components/Header'
 import ChatInterface from '@/components/ChatInterface'
+import ChatPreview from '@/components/ChatPreview'
 // ConversationSidebar removed - conversations are now ephemeral
 import Disclaimer from '@/components/Disclaimer'
 import LimitExceededModal from '@/components/LimitExceededModal'
@@ -108,8 +109,13 @@ export default function Home() {
   }, [conversationsLoaded, conversationSummaries.length, createConversation])
 
   const handleSendMessage = async (message: string, attachments?: FileAttachment[]) => {
-    // Check message limit for unauthenticated users
+    // Check authentication requirement and message limit
     const { usage } = useAppStore.getState()
+    if (usage.requiresAuth) {
+      // Redirect to sign-up for account creation
+      window.location.href = '/sign-up'
+      return
+    }
     if (!isSignedIn && usage.remainingQueries <= 0) {
       setShowLimitExceededModal(true)
       return
@@ -157,6 +163,11 @@ export default function Home() {
       console.log('API response data:', data)
 
       if (!response.ok) {
+        if (response.status === 401 && data.details?.requiresAuth) {
+          // Handle account required - redirect to sign up
+          window.location.href = '/sign-up'
+          return
+        }
         if (response.status === 429) {
           // Handle rate limiting - show modal instead of alert
           setShowLimitExceededModal(true)
@@ -283,7 +294,7 @@ export default function Home() {
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading your conversations...</p>
+          <p className="text-neutral-600">Getting your assistant...</p>
         </div>
       </div>
     )
@@ -338,27 +349,34 @@ export default function Home() {
       <main className="flex h-auto bg-gradient-to-b from-white to-neutral-50">
         {/* Main Chat Area - Full width since sidebar is removed */}
         <div className="w-full flex flex-col relative">
-
-          {currentConversation ? (
-            <>
-              {/* Chat Interface - Sized to content */}
-              <div className="p-4 pb-2">
-                <ChatInterface
-                  messages={currentConversation.messages}
-                  onSendMessage={handleSendMessage}
-                  isLoading={isLoading}
-                  selectedAIModel={selectedAIModel}
-                  onAIModelChange={handleAIModelChange}
-                  onSubscriptionModalChange={handleSubscriptionModalChange}
-                />
+          {isSignedIn ? (
+            // Show real chat interface for authenticated users
+            currentConversation ? (
+              <>
+                {/* Chat Interface - Sized to content */}
+                <div className="p-4 pb-2">
+                  <ChatInterface
+                    messages={currentConversation.messages}
+                    onSendMessage={handleSendMessage}
+                    isLoading={isLoading}
+                    selectedAIModel={selectedAIModel}
+                    onAIModelChange={handleAIModelChange}
+                    onSubscriptionModalChange={handleSubscriptionModalChange}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-neutral-600">Creating new conversation...</p>
+                </div>
               </div>
-            </>
+            )
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-neutral-600">Creating new conversation...</p>
-              </div>
+            // Show preview for non-authenticated users
+            <div className="p-4 pb-2">
+              <ChatPreview />
             </div>
           )}
         </div>

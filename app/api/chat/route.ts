@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-// import { auth } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 // import { supabaseAdmin } from '@/lib/supabase'
 
 // Grok API call function
@@ -140,7 +140,7 @@ Service Status: Using fallback response due to temporary AI service disruption.`
   }
 }
 
-import { getDb, ipUsage, NewIpUsage } from '@/lib/db'
+import { getDb, ipUsage, NewIpUsage, users, NewUser } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 
 // Get client IP address (fallback for unauthenticated users)
@@ -192,112 +192,94 @@ function getClientIP(request: NextRequest): string {
 // Temporary in-memory fallback for IP tracking
 const ipUsageMap = new Map<string, { count: number, resetTime: Date }>()
 
-// Check and update usage for an IP address using database persistence with fallback
-async function checkAndUpdateUsage(ip: string, limit: number = 5): Promise<{ allowed: boolean, remaining: number, resetTime: Date }> {
+// Check and update usage for a user ID
+async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{ allowed: boolean, remaining: number, resetTime: Date }> {
   const now = new Date()
-  console.log(`checkAndUpdateUsage called for IP: ${ip}, limit: ${limit}`)
+  console.log(`checkAndUpdateUsage called for userId: ${userId}, limit: ${limit}`)
   
   try {
     const db = getDb()
     
-    // Check if IP exists in database
-    const existingUsage = await db.query.ipUsage.findFirst({
-      where: eq(ipUsage.ipAddress, ip),
+    // Check if user exists in database
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.clerkId, userId),
     })
     
-    console.log('Existing usage found:', existingUsage ? {
-      ip: existingUsage.ipAddress,
-      count: existingUsage.queryCount,
-      limit: existingUsage.queryLimit,
-      firstUsed: existingUsage.firstUsed
+    console.log('Existing user found:', existingUser ? {
+      userId: existingUser.clerkId,
+      count: existingUser.queryCount,
+      limit: existingUser.queryLimit,
+      createdAt: existingUser.createdAt
     } : 'none')
     
-    if (!existingUsage) {
-      // Create new IP usage record
-      const newUsage: NewIpUsage = {
-        ipAddress: ip,
+    if (!existingUser) {
+      console.log('User not found in database, creating new user')
+      // Create new user with default free tier settings
+      const newUser: NewUser = {
+        clerkId: userId,
+        email: 'user@example.com', // Will be updated by webhook or user profile
+        tier: 'free',
         queryCount: 1,
-        queryLimit: limit,
-        firstUsed: now,
-        lastUsed: now,
+        queryLimit: 5,
+        subscriptionStatus: 'active',
       }
       
-      await db.insert(ipUsage).values(newUsage)
-      return { allowed: true, remaining: limit - 1, resetTime: now }
+      try {
+        await db.insert(users).values(newUser)
+        return { allowed: true, remaining: 4, resetTime: now }
+      } catch (error) {
+        console.error('Error creating new user:', error)
+        return { allowed: false, remaining: 0, resetTime: now }
+      }
     }
     
     // Check if user has exceeded limit
-    if (existingUsage.queryCount >= limit) {
-      return { allowed: false, remaining: 0, resetTime: existingUsage.firstUsed }
+    if (existingUser.queryCount >= existingUser.queryLimit) {
+      return { allowed: false, remaining: 0, resetTime: existingUser.createdAt }
     }
     
     // Increment usage count
-    const newCount = existingUsage.queryCount + 1
-    await db.update(ipUsage)
+    const newCount = existingUser.queryCount + 1
+    await db.update(users)
       .set({ 
         queryCount: newCount,
-        lastUsed: now,
         updatedAt: now
       })
-      .where(eq(ipUsage.ipAddress, ip))
+      .where(eq(users.clerkId, userId))
     
     return { 
       allowed: true, 
-      remaining: limit - newCount, 
-      resetTime: existingUsage.firstUsed 
+      remaining: existingUser.queryLimit - newCount, 
+      resetTime: existingUser.createdAt 
     }
   } catch (error) {
-    console.error('Database error in checkAndUpdateUsage, using fallback:', error)
-    
-    // Fallback to in-memory tracking
-    const existing = ipUsageMap.get(ip)
-    if (!existing) {
-      ipUsageMap.set(ip, { count: 1, resetTime: now })
-      return { allowed: true, remaining: limit - 1, resetTime: now }
-    }
-    
-    if (existing.count >= limit) {
-      return { allowed: false, remaining: 0, resetTime: existing.resetTime }
-    }
-    
-    existing.count++
-    return { allowed: true, remaining: limit - existing.count, resetTime: existing.resetTime }
+    console.error('Database error in checkAndUpdateUsage:', error)
+    return { allowed: false, remaining: 0, resetTime: now }
   }
 }
 
-// Get usage info for an IP address using database with fallback
-async function getUsageInfo(ip: string, limit: number = 5): Promise<{ count: number, remaining: number, resetTime: Date }> {
+// Get usage info for a user ID
+async function getUsageInfo(userId: string, limit: number = 5): Promise<{ count: number, remaining: number, resetTime: Date }> {
   const now = new Date()
   
   try {
     const db = getDb()
-    const existingUsage = await db.query.ipUsage.findFirst({
-      where: eq(ipUsage.ipAddress, ip),
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.clerkId, userId),
     })
     
-    if (!existingUsage) {
-      return { count: 0, remaining: limit, resetTime: now }
+    if (!existingUser) {
+      return { count: 0, remaining: 5, resetTime: now }
     }
     
     return { 
-      count: existingUsage.queryCount, 
-      remaining: Math.max(0, limit - existingUsage.queryCount), 
-      resetTime: existingUsage.firstUsed 
+      count: existingUser.queryCount, 
+      remaining: Math.max(0, existingUser.queryLimit - existingUser.queryCount), 
+      resetTime: existingUser.createdAt 
     }
   } catch (error) {
-    console.error('Database error in getUsageInfo, using fallback:', error)
-    
-    // Fallback to in-memory tracking
-    const existing = ipUsageMap.get(ip)
-    if (!existing) {
-      return { count: 0, remaining: limit, resetTime: now }
-    }
-    
-    return { 
-      count: existing.count, 
-      remaining: Math.max(0, limit - existing.count), 
-      resetTime: existing.resetTime 
-    }
+    console.error('Database error in getUsageInfo:', error)
+    return { count: 0, remaining: 0, resetTime: now }
   }
 }
 
@@ -938,15 +920,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Temporarily disable authentication for testing
-    // const { userId } = auth()
+    // Get authentication info
+    const { userId } = auth()
     
     let usageCheck: { allowed: boolean, remaining: number, resetTime: Date }
     let clientIP = 'unknown'
     
-    // For now, use IP-based tracking
-    clientIP = getClientIP(request)
-    usageCheck = await checkAndUpdateUsage(clientIP, 5)
+    // Check if user is authenticated
+    if (!userId) {
+      // For unauthenticated users, deny access and require account creation
+      return NextResponse.json(
+        { 
+          error: 'Account required',
+          details: {
+            requiresAuth: true,
+            message: 'Please create an account to get 5 free messages. Sign up to start using My AI Bookkeeper!'
+          }
+        },
+        { status: 401 }
+      )
+    }
+    
+    // For authenticated users, check usage limit
+    usageCheck = await checkAndUpdateUsage(userId, 5)
     
     if (!usageCheck.allowed) {
       return NextResponse.json(
@@ -955,7 +951,7 @@ export async function POST(request: NextRequest) {
           details: {
             limit: 5,
             resetTime: usageCheck.resetTime.toISOString(),
-            message: 'You have exceeded your free message limit. Please upgrade to a paid plan for unlimited access.'
+            message: 'You have used all 5 free messages. Please upgrade to a paid plan for unlimited access.'
           }
         },
         { status: 429 }
@@ -1028,7 +1024,7 @@ export async function POST(request: NextRequest) {
     const { response, modelUsed } = await getAIResponse(message, limitedHistory, modelToUse, attachments, userTier)
 
     // Log the interaction for analytics (no personal data stored)
-    console.log(`Chat interaction: IP=${clientIP.slice(0, 8)}***, Model=${modelUsed}, Message length=${message.length}, Response length=${response.length}, Attachments=${attachments?.length || 0}, Remaining queries=${usageCheck.remaining}`)
+    console.log(`Chat interaction: User=${userId ? 'authenticated' : 'anonymous'}, Model=${modelUsed}, Message length=${message.length}, Response length=${response.length}, Attachments=${attachments?.length || 0}, Remaining queries=${usageCheck.remaining}`)
 
     return NextResponse.json({
       response,
@@ -1051,27 +1047,39 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check usage for a user or IP address
+// GET endpoint to check usage for a user
 export async function GET(request: NextRequest) {
   try {
-    // const { userId } = auth()
-    const userId = null
+    const { userId } = auth()
+    
+    if (!userId) {
+      return NextResponse.json({
+        userId: null,
+        authenticated: false,
+        usage: {
+          count: 0,
+          remaining: 0,
+          limit: 5,
+          resetTime: new Date().toISOString(),
+          requiresAuth: true
+        }
+      })
+    }
     
     let usageInfo: { count: number, remaining: number, resetTime: Date }
-    let clientIP = 'unknown'
     
-    // For now, use IP-based tracking
-    clientIP = getClientIP(request)
-    usageInfo = await getUsageInfo(clientIP, 5)
+    // Use user-based tracking for authenticated users
+    usageInfo = await getUsageInfo(userId, 5)
     
     return NextResponse.json({
-      ip: clientIP,
-      userId: userId || null,
+      userId: userId,
+      authenticated: true,
       usage: {
         count: usageInfo.count,
         remaining: usageInfo.remaining,
         limit: usageInfo.remaining === -1 ? 'unlimited' : 5,
-        resetTime: usageInfo.resetTime.toISOString()
+        resetTime: usageInfo.resetTime.toISOString(),
+        requiresAuth: false
       }
     })
   } catch (error) {

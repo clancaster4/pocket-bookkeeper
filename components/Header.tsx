@@ -22,7 +22,9 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
 
   // Determine what to display based on subscription status
   const getQueryDisplay = () => {
-    if (subscription.tier === 'free') {
+    if (usage.requiresAuth) {
+      return 'Create account for 5 free messages'
+    } else if (subscription.tier === 'free') {
       return `${usage.remainingQueries} messages remaining`
     } else if (subscription.tier === 'basic' || subscription.tier === 'elite') {
       return 'Unlimited messages'
@@ -32,7 +34,9 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
   }
 
   const getQueryDisplayColor = () => {
-    if (subscription.tier === 'free') {
+    if (usage.requiresAuth) {
+      return 'bg-blue-100 text-blue-700'
+    } else if (subscription.tier === 'free') {
       return usage.remainingQueries <= 3 ? 'bg-red-100 text-red-700' : 'bg-secondary-100 text-secondary-700'
     } else {
       return 'bg-green-100 text-green-700'
@@ -54,7 +58,14 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
               <div className="text-sm text-neutral-600">
                 Welcome, {user?.firstName || user?.emailAddresses?.[0]?.emailAddress || 'User'}
               </div>
-              <UserButton />
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8"
+                  }
+                }}
+              />
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
@@ -84,17 +95,31 @@ export default function Header({ onSubscriptionModalChange }: HeaderProps) {
           <p className="text-sm sm:text-base text-neutral-500 mb-6">
             {isSignedIn 
               ? 'Get expert guidance on expenses, taxes, and financial management'
-              : 'Try it today! No sign-up required for your first 5 messages'}
+              : usage.requiresAuth
+                ? 'Create a free account to get 5 messages and start managing your business finances'
+                : 'Try it today! No sign-up required for your first 5 messages'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
-            {/* Show usage indicator only for free users */}
-            {subscription.tier === 'free' && (
-              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()}`}>
-                <span className="w-2 h-2 rounded-full mr-2" style={{ 
-                  backgroundColor: usage.remainingQueries <= 3 ? '#dc2626' : '#6366f1' 
-                }}></span>
-                {getQueryDisplay()}
-              </div>
+            {/* Show usage indicator for free users and when auth is required */}
+            {(subscription.tier === 'free' || usage.requiresAuth) && (
+              usage.requiresAuth ? (
+                <button 
+                  onClick={() => window.location.href = '/sign-up'}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()} hover:opacity-80 transition-opacity cursor-pointer`}
+                >
+                  <span className="w-2 h-2 rounded-full mr-2" style={{ 
+                    backgroundColor: '#2563eb' 
+                  }}></span>
+                  {getQueryDisplay()}
+                </button>
+              ) : (
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getQueryDisplayColor()}`}>
+                  <span className="w-2 h-2 rounded-full mr-2" style={{ 
+                    backgroundColor: usage.remainingQueries <= 3 ? '#dc2626' : '#6366f1' 
+                  }}></span>
+                  {getQueryDisplay()}
+                </div>
+              )
             )}
             
             {/* Show subscription status for paying users */}

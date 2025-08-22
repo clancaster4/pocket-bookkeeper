@@ -15,7 +15,9 @@
       "Bash(npx drizzle-kit generate:pg:*)",
       "Bash(npx drizzle-kit:*)",
       "Bash(npm i:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

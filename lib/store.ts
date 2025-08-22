@@ -4,10 +4,12 @@ import { User, PricingPlan } from '@/types/database'
 interface AppState {
   user: User | null
   isLoading: boolean
+  isAuthenticated: boolean
   usage: {
     queryCount: number
     queryLimit: number
     remainingQueries: number
+    requiresAuth: boolean
   }
   subscription: {
     tier: 'free' | 'basic' | 'elite'
@@ -15,7 +17,8 @@ interface AppState {
   }
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
-  updateUsage: (queryCount: number, queryLimit: number) => void
+  setAuthenticated: (authenticated: boolean) => void
+  updateUsage: (queryCount: number, queryLimit: number, requiresAuth?: boolean) => void
   updateSubscription: (tier: 'free' | 'basic' | 'elite', status: string | null) => void
   incrementQueryCount: () => void
 }
@@ -23,10 +26,12 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   user: null,
   isLoading: false,
+  isAuthenticated: false,
   usage: {
     queryCount: 0,
     queryLimit: 5,
     remainingQueries: 5,
+    requiresAuth: false,
   },
   subscription: {
     tier: 'free',
@@ -34,12 +39,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   setUser: (user) => set({ user }),
   setLoading: (isLoading) => set({ isLoading }),
-  updateUsage: (queryCount, queryLimit) => {
-    console.log('Store updateUsage called with:', { queryCount, queryLimit })
+  setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+  updateUsage: (queryCount, queryLimit, requiresAuth = false) => {
+    console.log('Store updateUsage called with:', { queryCount, queryLimit, requiresAuth })
     const newUsage = {
       queryCount,
       queryLimit,
       remainingQueries: Math.max(0, queryLimit - queryCount),
+      requiresAuth,
     }
     console.log('Setting new usage state:', newUsage)
     set({
