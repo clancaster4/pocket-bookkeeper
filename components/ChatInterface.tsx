@@ -203,8 +203,8 @@ export default function ChatInterface({
         </button>
       </div>
 
-      {/* Messages Area - Always show when there are messages */}
-      {messages.length > 0 && (
+      {/* Messages Area - Show when there are messages or loading */}
+      {(messages.length > 0 || isLoading) && (
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-3 sm:space-y-4 min-h-0">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} selectedAIModel={selectedAIModel} />
@@ -233,8 +233,8 @@ export default function ChatInterface({
       </div>
     )}
 
-    {/* Welcome Message - Show when there are no messages */}
-    {messages.length === 0 && (
+    {/* Welcome Message - Show when there are no messages and not loading */}
+    {messages.length === 0 && !isLoading && (
       <div className="flex-1 overflow-y-auto p-4 sm:p-8">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-4 sm:mb-6">
