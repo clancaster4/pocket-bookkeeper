@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useAppStore } from '@/lib/store'
+import { getClientFingerprint } from '@/lib/client-fingerprint'
 
 export function useUser() {
   const { setUser, setLoading, updateUsage } = useAppStore()
@@ -13,7 +14,11 @@ export function useUser() {
       try {
         // Fetch current usage from server
         console.log('useUser: Fetching usage from /api/chat')
-        const usageResponse = await fetch('/api/chat')
+        const usageResponse = await fetch('/api/chat', {
+          headers: {
+            'X-Client-Fingerprint': getClientFingerprint(),
+          }
+        })
         console.log('useUser: Usage response status:', usageResponse.status)
         
         if (usageResponse.ok) {

@@ -13,6 +13,7 @@ import AIOptimizedContent from '@/components/AIOptimizedContent'
 import { useConversations } from '@/hooks/useConversations'
 import { useUser as useAppUser } from '@/hooks/useUser'
 import { useAppStore } from '@/lib/store'
+import { getClientFingerprint } from '@/lib/client-fingerprint'
 import { Message, FileAttachment } from '@/types/chat'
 
 export default function Home() {
@@ -137,6 +138,7 @@ export default function Home() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Client-Fingerprint': getClientFingerprint(),
         },
         body: JSON.stringify({
           message,
@@ -197,8 +199,19 @@ export default function Home() {
       if (!isSignedIn && data.usage) {
         const { updateUsage } = useAppStore.getState()
         const totalUsed = 5 - data.usage.remaining
+        console.log('About to update usage:', { 
+          totalUsed, 
+          remaining: data.usage.remaining, 
+          isSignedIn, 
+          hasUsageData: !!data.usage,
+          userAgent: navigator.userAgent.substring(0, 100)
+        })
         updateUsage(totalUsed, 5)
-        console.log('Updated usage from API response:', { totalUsed, remaining: data.usage.remaining })
+        console.log('Usage updated successfully')
+        
+        // Verify the update worked
+        const currentState = useAppStore.getState()
+        console.log('Current usage state after update:', currentState.usage)
       }
 
     } catch (error) {

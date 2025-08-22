@@ -34,13 +34,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   setUser: (user) => set({ user }),
   setLoading: (isLoading) => set({ isLoading }),
-  updateUsage: (queryCount, queryLimit) => set({
-    usage: {
+  updateUsage: (queryCount, queryLimit) => {
+    console.log('Store updateUsage called with:', { queryCount, queryLimit })
+    const newUsage = {
       queryCount,
       queryLimit,
       remainingQueries: Math.max(0, queryLimit - queryCount),
     }
-  }),
+    console.log('Setting new usage state:', newUsage)
+    set({
+      usage: newUsage
+    })
+  },
   updateSubscription: (tier, status) => set({
     subscription: {
       tier,

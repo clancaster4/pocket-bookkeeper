@@ -21,32 +21,45 @@ async function callGrokAPI(message: string, history: any[], model: string, attac
     const messages = [
       {
         role: 'system',
-        content: `You are My AI Bookkeeper, an AI assistant specialized EXCLUSIVELY in accounting, bookkeeping, and finance for small businesses.
+        content: `You are My AI Bookkeeper, a friendly and knowledgeable AI assistant specialized in accounting, bookkeeping, and finance for small businesses.
 
-STRICT RULES:
+COMMUNICATION STYLE:
+- Explain complex accounting concepts in simple, everyday language
+- Always provide the "plain English" explanation first, then the technical term
+- Use relatable examples that small business owners can understand
+- Mix professional expertise with approachable, conversational tone
+- Break down complicated topics into easy-to-follow steps
+- Avoid overwhelming users with too much jargon at once
+
+RESPONSE FORMAT:
+- Start with a simple, clear answer
+- Follow with practical steps or examples
+- Include relevant technical terms in parentheses for learning
+- Use analogies when helpful (e.g., "Think of cash flow like water flowing through pipes...")
+- End with actionable next steps when appropriate
+
+AREAS OF EXPERTISE:
 1. You ONLY answer questions related to:
-   - Bookkeeping and accounting
-   - Tax preparation and deductions
-   - Financial management and cash flow
-   - Business expenses and income tracking
-   - Financial software (QuickBooks, Xero, etc.)
-   - Business structure (LLC, S-Corp, etc.)
-   - Payroll and employee finances
-   - Financial reporting and compliance
-   - Invoicing and payments
+   - Bookkeeping and accounting (tracking money in and out)
+   - Tax preparation and deductions (keeping more of what you earn)
+   - Financial management and cash flow (making sure you have money when you need it)
+   - Business expenses and income tracking (knowing where your money goes)
+   - Financial software guidance (QuickBooks, Xero, etc.)
+   - Business structure decisions (LLC, S-Corp, etc. - choosing the right setup)
+   - Payroll and employee finances (paying your team properly)
+   - Financial reporting and compliance (required paperwork and reports)
+   - Invoicing and payments (getting paid by customers)
 
-2. You MUST REFUSE to answer questions about:
-   - Non-financial topics (entertainment, travel, recipes, etc.)
+2. POLITELY DECLINE questions about:
+   - Non-financial topics
    - Personal advice unrelated to business finance
    - Technical/programming help (unless related to accounting software)
    - Academic homework (unless it's accounting/finance coursework)
    - Medical, legal (non-tax), or other professional services
 
-3. When refusing off-topic questions, be polite and redirect to financial topics.
-4. Always maintain professional boundaries as a bookkeeping expert.
-5. Provide accurate, helpful financial guidance while staying within your expertise.
-6. Keep responses concise but comprehensive.
-7. Use bullet points and clear formatting when helpful.`
+3. When declining, redirect to financial topics and offer helpful alternatives.
+4. Always balance professional expertise with accessibility.
+5. Remember: your users are business owners, not accountants - help them succeed!`
       },
       ...history.map((msg: any) => ({
         role: msg.role,
@@ -97,18 +110,18 @@ STRICT RULES:
     console.error('Grok API call failed:', error)
     
     // Fallback to mock response if API fails
-    const fallbackResponse = `⚠️ **AI Service Temporarily Unavailable**
+    const fallbackResponse = `AI Service Temporarily Unavailable
 
 I'm experiencing a temporary connection issue with the advanced AI service. Here's some general bookkeeping guidance:
 
-**Key Bookkeeping Principles:**
+Key Bookkeeping Principles:
 • Separate business and personal finances
 • Keep detailed records of all transactions
 • Reconcile accounts regularly
 • Categorize expenses properly
 • Save receipts and documentation
 
-**Common Business Expense Categories:**
+Common Business Expense Categories:
 • Office supplies and materials
 • Business meals (50% deductible)
 • Vehicle/travel expenses
@@ -116,9 +129,9 @@ I'm experiencing a temporary connection issue with the advanced AI service. Here
 • Insurance premiums
 • Equipment and software
 
-**For immediate help:** Please try your question again in a few moments, or contact our support team.
+For immediate help: Please try your question again in a few moments, or contact our support team.
 
-🤖 **Service Status**: Using fallback response due to temporary AI service disruption.`
+Service Status: Using fallback response due to temporary AI service disruption.`
 
     return {
       response: fallbackResponse,
@@ -136,19 +149,38 @@ function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIP = request.headers.get('x-real-ip')
   const cfConnectingIP = request.headers.get('cf-connecting-ip')
+  const userAgent = request.headers.get('user-agent') || ''
   
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
-  }
-  if (realIP) {
-    return realIP
-  }
-  if (cfConnectingIP) {
-    return cfConnectingIP
+  // Get client fingerprint from headers if available
+  const clientFingerprint = request.headers.get('x-client-fingerprint')
+  
+  // Log IP detection for debugging
+  console.log('IP Detection Debug:', {
+    forwarded,
+    realIP,
+    cfConnectingIP,
+    requestIP: request.ip,
+    userAgent: userAgent.substring(0, 100),
+    clientFingerprint
+  })
+  
+  let detectedIP = 'unknown'
+  
+  // If we have a client fingerprint, use that for more consistent tracking
+  if (clientFingerprint) {
+    detectedIP = `fp_${clientFingerprint}`
+  } else if (forwarded) {
+    detectedIP = forwarded.split(',')[0].trim()
+  } else if (realIP) {
+    detectedIP = realIP
+  } else if (cfConnectingIP) {
+    detectedIP = cfConnectingIP
+  } else {
+    detectedIP = request.ip || 'unknown'
   }
   
-  // Fallback to connection remote address
-  return request.ip || 'unknown'
+  console.log('Final detected IP/fingerprint:', detectedIP)
+  return detectedIP
 }
 
 // Temporary in-memory fallback for IP tracking
@@ -357,32 +389,45 @@ function isTopicValid(message: string): { valid: boolean, reason?: string } {
 }
 
 // System prompt for the AI to enforce topic restrictions
-const SYSTEM_PROMPT = `You are My AI Bookkeeper, an AI assistant specialized EXCLUSIVELY in accounting, bookkeeping, and finance for small businesses.
+const SYSTEM_PROMPT = `You are My AI Bookkeeper, a friendly and knowledgeable AI assistant specialized in accounting, bookkeeping, and finance for small businesses.
 
-STRICT RULES:
+COMMUNICATION STYLE:
+- Explain complex accounting concepts in simple, everyday language
+- Always provide the "plain English" explanation first, then the technical term
+- Use relatable examples that small business owners can understand
+- Mix professional expertise with approachable, conversational tone
+- Break down complicated topics into easy-to-follow steps
+- Avoid overwhelming users with too much jargon at once
+
+RESPONSE FORMAT:
+- Start with a simple, clear answer
+- Follow with practical steps or examples
+- Include relevant technical terms in parentheses for learning
+- Use analogies when helpful (e.g., "Think of your business budget like a household budget...")
+- End with actionable next steps when appropriate
+
+AREAS OF EXPERTISE:
 1. You ONLY answer questions related to:
-   - Bookkeeping and accounting
-   - Tax preparation and deductions
-   - Financial management and cash flow
-   - Business expenses and income tracking
-   - Financial software (QuickBooks, Xero, etc.)
-   - Business structure (LLC, S-Corp, etc.)
-   - Payroll and employee finances
-   - Financial reporting and compliance
-   - Invoicing and payments
+   - Bookkeeping and accounting (tracking money in and out)
+   - Tax preparation and deductions (keeping more of what you earn)
+   - Financial management and cash flow (making sure you have money when you need it)
+   - Business expenses and income tracking (knowing where your money goes)
+   - Financial software guidance (QuickBooks, Xero, etc.)
+   - Business structure decisions (LLC, S-Corp, etc. - choosing the right setup)
+   - Payroll and employee finances (paying your team properly)
+   - Financial reporting and compliance (required paperwork and reports)
+   - Invoicing and payments (getting paid by customers)
 
-2. You MUST REFUSE to answer questions about:
-   - Non-financial topics (entertainment, travel, recipes, etc.)
+2. POLITELY DECLINE questions about:
+   - Non-financial topics
    - Personal advice unrelated to business finance
    - Technical/programming help (unless related to accounting software)
    - Academic homework (unless it's accounting/finance coursework)
    - Medical, legal (non-tax), or other professional services
 
-3. When refusing off-topic questions, be polite and redirect to financial topics.
-
-4. Always maintain professional boundaries as a bookkeeping expert.
-
-5. Provide accurate, helpful financial guidance while staying within your expertise.`
+3. When declining, redirect to financial topics and offer helpful alternatives.
+4. Always balance professional expertise with accessibility.
+5. Remember: your users are business owners, not accountants - help them succeed!`
 
 // Call actual Grok API for premium tiers, mock responses for free tier
 async function getAIResponse(message: string, history: any[], model: string = 'standard-ai', attachments?: any[], userTier: string = 'free'): Promise<{ response: string, modelUsed: string }> {
@@ -394,21 +439,21 @@ async function getAIResponse(message: string, history: any[], model: string = 's
     let response = ''
     
     if (topicValidation.reason === 'off-topic') {
-      response = `🚫 **I'm a Bookkeeping Specialist**
+      response = `I'm a Bookkeeping Specialist
 
 I apologize, but I can only help with accounting, bookkeeping, and finance-related questions. I noticed your question seems to be about a non-financial topic.
 
-**I can help you with:**
-• 📊 Expense tracking and categorization
-• 💰 Tax deductions and preparation
-• 📈 Financial reports and analysis
-• 💵 Cash flow management
-• 🧾 Invoice and payment processing
-• 📋 QuickBooks and accounting software
-• 🏢 Business structure and compliance
-• 💼 Payroll and employee finances
+I can help you with:
+• Expense tracking and categorization
+• Tax deductions and preparation
+• Financial reports and analysis
+• Cash flow management
+• Invoice and payment processing
+• QuickBooks and accounting software
+• Business structure and compliance
+• Payroll and employee finances
 
-**Example questions I can answer:**
+Example questions I can answer:
 • "How should I categorize this business expense?"
 • "What tax deductions can I claim as a freelancer?"
 • "How do I reconcile my bank statements?"
@@ -416,21 +461,21 @@ I apologize, but I can only help with accounting, bookkeeping, and finance-relat
 
 Please ask me a bookkeeping or finance-related question, and I'll be happy to help!`
     } else {
-      response = `🤔 **Let Me Help With Your Bookkeeping Needs**
+      response = `Let Me Help With Your Bookkeeping Needs
 
 I'm My AI Bookkeeper, your AI assistant for all things accounting and finance. I'm not sure how to help with that particular request, but I'm an expert in business financial management!
 
-**Try asking me about:**
-• 📝 How to track business expenses
-• 🧮 Understanding financial statements
-• 💡 Tax-saving strategies for small businesses
-• 📊 Setting up your chart of accounts
-• 💰 Managing cash flow
-• 📱 Using accounting software effectively
-• 🏦 Business banking best practices
-• 📈 Financial planning and budgeting
+Try asking me about:
+• How to track business expenses
+• Understanding financial statements
+• Tax-saving strategies for small businesses
+• Setting up your chart of accounts
+• Managing cash flow
+• Using accounting software effectively
+• Business banking best practices
+• Financial planning and budgeting
 
-**Quick Start Questions:**
+Quick Start Questions:
 • "What expenses can I deduct as a business owner?"
 • "How do I prepare for tax season?"
 • "What's the difference between cash and accrual accounting?"
@@ -444,16 +489,16 @@ What bookkeeping or financial question can I help you with today?`
   // Validate subscription tier access
   if (model === 'advanced-ai' && userTier !== 'basic' && userTier !== 'elite') {
     return { 
-      response: `🔒 **Upgrade Required for Advanced AI**
+      response: `Upgrade Required for Advanced AI
 
 The Advanced AI model (Grok-3-mini) is available with the Everyday Assistant subscription tier.
 
-**Available with your subscription:**
+Available with your subscription:
 • Standard AI responses
 • Basic bookkeeping guidance
 • 10 queries per month (free tier)
 
-**Upgrade to Everyday Assistant ($9.99/month) for:**
+Upgrade to Everyday Assistant ($9.99/month) for:
 • Unlimited queries
 • Advanced AI powered by Grok-3-mini
 • Enhanced bookkeeping guidance
@@ -466,14 +511,14 @@ Would you like to upgrade your subscription?`,
 
   if (model === 'premium-ai' && userTier !== 'elite') {
     return { 
-      response: `🔒 **Upgrade Required for Premium AI**
+      response: `Upgrade Required for Premium AI
 
 The Premium AI model (Grok-4) is available with the Elite Advisor subscription tier.
 
-**Available with your subscription:**
+Available with your subscription:
 ${userTier === 'basic' ? '• Advanced AI powered by Grok-3-mini\n• Unlimited queries\n' : '• Standard AI responses\n• 10 queries per month\n'}
 
-**Upgrade to Elite Advisor ($19.99/month) for:**
+Upgrade to Elite Advisor ($19.99/month) for:
 • Premium AI powered by Grok-4
 • Most advanced reasoning and analysis
 • Priority support
@@ -507,82 +552,82 @@ async function getFreeResponse(message: string, history: any[], attachments?: an
   
   // Handle greetings
   if (/^(hi|hello|hey|good morning|good afternoon|good evening)[\s!.,?]*$/i.test(message.trim())) {
-    response = `👋 **Hello! Welcome to My AI Bookkeeper**
+    response = `Hello! Welcome to My AI Bookkeeper
 
-I'm your AI-powered bookkeeping assistant, here to help with all your accounting and financial management needs.
+I'm your friendly AI bookkeeping assistant! Think of me as your personal finance expert who speaks in plain English, not confusing accounting jargon.
 
-**I can help you with:**
-• 📊 Expense tracking and categorization
-• 💰 Tax deductions and savings
-• 📈 Financial reports and analysis
-• 💵 Cash flow management
-• 🧾 Invoice and receipt processing
-• 📋 QuickBooks and software guidance
-• 🏢 Business structure advice
-• 💼 Payroll and compliance
+I can help you with:
+• Tracking your money - Know where every dollar goes (expense tracking)
+• Keeping more of what you earn - Find tax breaks you might be missing
+• Understanding your numbers - Make sense of reports and financial data
+• Cash flow - Make sure you have money when bills are due
+• Paperwork made simple - Organize receipts and invoices
+• Software help - QuickBooks, Xero, or whatever you use
+• Business setup - LLC, S-Corp, or stay simple? I'll explain the difference
+• Paying employees - Do it right and stay compliant
 
-**How can I help with your bookkeeping today?**
+How can I help your business today?
 
-Feel free to:
-• Ask a specific question about your finances
-• Upload a receipt or document for analysis
-• Get help with tax deductions
-• Learn about financial best practices
+I'm here to:
+• Answer questions in simple terms (no confusing accountant-speak!)
+• Look at your receipts or documents and explain what they mean
+• Help you save money on taxes
+• Show you the best practices that actually work for small businesses
 
-What bookkeeping question can I answer for you?`
+What's your biggest money question right now?`
   }
   
   // Handle service questions
   else if (lowerMessage.includes('what can you help') || lowerMessage.includes('what do you do')) {
-    response = `📚 **I'm Your Expert Bookkeeping Assistant**
+    response = `I'm Your Expert Bookkeeping Assistant
 
 I specialize exclusively in accounting, bookkeeping, and financial management for small businesses. Here's how I can help:
 
-**My Areas of Expertise:**
+My Areas of Expertise:
 
-📊 **Bookkeeping & Accounting**
+Bookkeeping & Accounting
 • Expense categorization
 • Double-entry bookkeeping
 • Chart of accounts setup
 • Journal entries
 • Bank reconciliation
 
-💰 **Tax Assistance**
+Tax Assistance
 • Identifying deductions
 • Quarterly tax planning
 • 1099 vs W-2 guidance
 • Business vs personal expenses
 • Tax document preparation
 
-📈 **Financial Analysis**
+Financial Analysis
 • Understanding P&L statements
 • Balance sheet analysis
 • Cash flow forecasting
 • Financial ratios
 • Profit margin calculations
 
-💼 **Business Finance**
+Business Finance
 • LLC vs S-Corp decisions
 • Business structure advice
 • Contractor vs employee classification
 • Business banking setup
 • Credit and loan guidance
 
-🖥️ **Software Support**
+Software Support
 • QuickBooks assistance
 • Excel/spreadsheet formulas
 • Xero, FreshBooks, Wave help
 • Integration guidance
 • Report generation
 
-📋 **Compliance & Documentation**
+Compliance & Documentation
 • Record keeping requirements
 • Audit preparation
 • Financial documentation
 • Retention policies
 • Regulatory compliance
 
-**Note:** I focus solely on financial topics. For non-financial questions, please consult appropriate specialists.
+Note: I focus solely on financial topics. For non-financial questions, please consult appropriate specialists.
 
 What specific bookkeeping or financial question can I help you with?`
   }
@@ -592,24 +637,24 @@ What specific bookkeeping or financial question can I help you with?`
     const imageCount = attachments.filter(att => att.type.startsWith('image/')).length
     const documentCount = attachments.filter(att => !att.type.startsWith('image/')).length
     
-    response = `📄 **Document Analysis Results:**
+    response = `Document Analysis Results:
 
 I've analyzed the ${attachments.length} file${attachments.length > 1 ? 's' : ''} you uploaded:
 
-**Files Received:**
+Files Received:
 ${attachments.map(att => `• ${att.name} (${att.type})`).join('\n')}
 
-**Analysis Summary:**
+Analysis Summary:
 ${imageCount > 0 ? `• ${imageCount} image${imageCount > 1 ? 's' : ''} - I can see visual content like receipts, invoices, or financial documents\n` : ''}${documentCount > 0 ? `• ${documentCount} document${documentCount > 1 ? 's' : ''} - I can extract text and data from these files\n` : ''}
 
-**What I can help you with:**
-• 📊 **Data Extraction**: Extract amounts, dates, vendor names, and line items
-• 💰 **Expense Categorization**: Identify and categorize business expenses
-• 📋 **Document Classification**: Determine if it's a receipt, invoice, bank statement, etc.
-• ✅ **Validation**: Check for missing information or potential issues
-• 📈 **Analysis**: Provide insights on spending patterns or financial trends
+What I can help you with:
+• Data Extraction: Extract amounts, dates, vendor names, and line items
+• Expense Categorization: Identify and categorize business expenses
+• Document Classification: Determine if it's a receipt, invoice, bank statement, etc.
+• Validation: Check for missing information or potential issues
+• Analysis: Provide insights on spending patterns or financial trends
 
-**Next Steps:**
+Next Steps:
 Please let me know what specific information you'd like me to extract or analyze from these documents. For example:
 • "What expenses can I deduct from this receipt?"
 • "Can you extract the line items from this invoice?"
@@ -619,224 +664,236 @@ Please let me know what specific information you'd like me to extract or analyze
   
   // Basic bookkeeping topics
   else if (lowerMessage.includes('expense') || lowerMessage.includes('cost') || lowerMessage.includes('spend')) {
-    response = `📝 **Expense Tracking Best Practices:**
+    response = `Let's Make Expense Tracking Simple!
 
-**1. Categorize Your Expenses**
-- Business vs Personal: Always separate business and personal expenses
-- Use clear categories: Office supplies, travel, meals, utilities, etc.
-- Consider using accounting software for automatic categorization
+Think of tracking expenses like keeping a detailed diary of where your business money goes. Here's how to do it without the headache:
 
-**2. Keep Receipts & Documentation**
-- Save all receipts (physical or digital)
-- Use apps like Expensify or QuickBooks for receipt scanning
-- Store receipts for at least 3-7 years for tax purposes
+1. The Golden Rule: Keep Business and Personal Separate
+Just like you wouldn't mix your personal grocery receipts with business ones, always keep these completely separate. It'll save you huge headaches come tax time!
 
-**3. Regular Recording**
-- Record expenses weekly or monthly
-- Don't let receipts pile up
-- Use a consistent system (spreadsheet, software, or app)
+2. Create Simple Categories (Don't Overthink It!)
+Start with these basic buckets:
+- Office Stuff - Supplies, rent, utilities
+- Getting Around - Gas, parking, travel costs  
+- Business Meals - Client dinners, team lunches (50% tax deductible!)
+- Tech & Tools - Software, equipment, apps
+- Learning & Growing - Training, books, conferences
+- Insurance & Protection - Business insurance, legal fees
 
-**4. Common Business Expense Categories:**
-- 🏢 Office & Supplies
-- 🚗 Travel & Transportation  
-- 🍽️ Meals & Entertainment
-- 💻 Technology & Software
-- 📚 Professional Development
-- 🏥 Health Insurance
-- 💰 Insurance & Legal
+3. The "Shoebox Method" vs. Going Digital
+- Old School: Keep all receipts in a shoebox (but please organize monthly!)
+- Smart Way: Use your phone to snap photos or apps like QuickBooks/Expensify
+- Either works - just pick one and stick with it!
 
-**5. Tax Deductible vs Non-Deductible**
-- Most business expenses are tax deductible
-- Personal expenses are NOT deductible
-- Mixed-use items need proper allocation
+4. The Tax Question Everyone Asks
+Simple rule: If you bought it FOR your business, it's probably deductible. If you bought it for personal use, it's not. When in doubt, ask yourself: "Did I buy this to make money in my business?"
 
-**💡 Pro Tip**: You can upload photos of receipts or documents, and I'll help you categorize and analyze them!
+Real Talk: Most small business owners overthink this. Start simple, stay consistent, and upgrade your system as you grow.
 
-Would you like me to help you set up a specific expense tracking system for your business?`
+What specific expense question do you have? I can explain it in plain English - no accounting degree required!`
   }
   
   // Tax-related questions
   else if (lowerMessage.includes('tax') || lowerMessage.includes('deduct') || lowerMessage.includes('irs')) {
-    response = `💰 **Tax Deduction Guide:**
+    response = `Let's Talk Taxes - In Plain English!
 
-**Common Business Tax Deductions:**
+Taxes don't have to be scary! Think of deductions as "business expenses that save you money." Here are the big ones:
 
-**1. Home Office Deduction**
-- Must be used regularly and exclusively for business
-- Calculate: (Business square footage / Total square footage) × Total home expenses
-- Simplified method: $5 per square foot (max 300 sq ft)
+1. Your Home Office (If You Work From Home)
+Simple question: Do you have a room or area used ONLY for business? If yes, you can deduct it!
+• Easy way: $5 per square foot (up to 300 sq ft = $1,500 max)
+• Detailed way: Figure out what percentage of your home is for business, then deduct that percentage of your home costs
+• Real talk: Most people use the easy way - it's simpler and usually just as good!
 
-**2. Vehicle Expenses**
-- Standard mileage rate: 65.5¢ per business mile (2024)
-- Or actual expenses: gas, maintenance, insurance, depreciation
-- Keep detailed mileage logs
+2. Your Car for Business
+Every mile you drive for business can save you money on taxes!
+• 2024 rate: 65.5¢ per business mile (this rate goes up most years)
+• What counts: Driving to meet clients, going to the bank for business, picking up supplies
+• What doesn't count: Your regular commute to a main office
+• Keep track: Use a simple mileage app or even a notebook in your car
 
-**3. Equipment & Technology**
-- Computers, software, office equipment
-- Can deduct full cost if under $2,500 (de minimis safe harbor)
-- Larger items may need to be depreciated
+3. The Stuff You Buy for Business
+• Under $2,500: Just deduct the full amount this year (called "de minimis safe harbor" - fancy term for "small stuff rule")
+• Over $2,500: You might need to spread it out over several years (called "depreciation" - like paying for it bit by bit on your taxes)
+• Examples: Computers, software, desks, cameras, tools
 
-**4. Professional Services**
-- Accounting fees
-- Legal fees
-- Business consulting
-- Professional memberships
+4. Getting Help From Pros
+• Your accountant's fees (yes, paying someone to do your taxes is tax-deductible!)
+• Lawyer fees for business stuff
+• Business coaches or consultants
+• Professional memberships that help your business
 
-**5. Marketing & Advertising**
-- Website costs
-- Business cards
-- Online advertising
-- Print materials
+5. Telling People About Your Business
+• Website costs
+• Business cards and flyers  
+• Facebook/Google ads
+• Networking event costs
 
-**6. Travel & Meals**
-- Business travel (50% deductible for meals)
-- Client entertainment (50% deductible)
-- Conference and training costs
+6. Business Travel & Meals
+• Travel: 100% deductible if it's truly for business
+• Meals: 50% deductible (the IRS figures you'd eat anyway, so they only give you half)
+• Client entertainment: Also 50% deductible
 
-**Important Notes:**
-- Keep detailed records and receipts
-- Separate business and personal expenses
-- Consider consulting a tax professional
-- Rules vary by business structure (LLC, Corp, etc.)
+The Golden Rules:
+1. Keep receipts - Your phone camera works great for this!
+2. Business only - Don't try to deduct personal stuff (the IRS will notice)
+3. When in doubt, ask - Better safe than sorry
+4. Different business types have different rules - LLC vs Corporation vs Sole Proprietor all work a bit differently
 
-**💡 Pro Tip**: Upload photos of your receipts and I can help identify which expenses are deductible!
+Pro Tip: Take a photo of any business receipt and I can help you figure out if it's deductible and how to categorize it!
 
-What specific tax deduction questions do you have?`
+What specific tax question is keeping you up at night? Let's make it simple!`
   }
   
   // Cash flow questions
   else if (lowerMessage.includes('cash flow') || lowerMessage.includes('money') || lowerMessage.includes('revenue')) {
-    response = `💵 **Cash Flow Management:**
+    response = `Let's Fix Your Money Flow - Think of It Like Water!
 
-**Understanding Cash Flow:**
-Cash flow = Money coming in - Money going out
+Cash flow is just a fancy way of saying "making sure you have money when you need it." Think of your business like a bathtub:
+• Water flowing IN = money from customers
+• Water flowing OUT = money for bills and expenses
+• You want more coming in than going out!
 
-**Three Types of Cash Flow:**
-1. **Operating**: Day-to-day business activities
-2. **Investing**: Equipment, property purchases
-3. **Financing**: Loans, investments, owner contributions
+The Three "Buckets" of Money Movement:
+1. Day-to-Day Stuff (Operating) - Paying for supplies, rent, your salary
+2. Big Purchases (Investing) - Buying equipment, a new computer, office space
+3. Getting Money to Start/Grow (Financing) - Loans, investor money, money you put in yourself
 
-**Improving Cash Flow:**
+How to Get Money Coming In FASTER:
 
-**1. Speed Up Incoming Cash**
-- Send invoices immediately
-- Offer early payment discounts
-- Accept multiple payment methods
-- Follow up on overdue payments
+1. Send Bills Right Away
+Don't wait! The day you finish work for a client, send that invoice. Every day you wait is money sitting on the table.
 
-**2. Slow Down Outgoing Cash**
-- Negotiate payment terms with suppliers
-- Use credit cards strategically (30-day float)
-- Pay bills on time, not early
-- Consider leasing instead of buying
+2. Make It Easy for People to Pay You
+• Accept credit cards (yes, even if there's a fee - you'll get paid faster)
+• Try Venmo, PayPal, Zelle for small amounts
+• Offer a small discount for paying early (like "2% off if paid in 10 days")
 
-**3. Monitor Regularly**
-- Create cash flow projections
-- Track accounts receivable aging
-- Maintain emergency fund (3-6 months expenses)
-- Review monthly cash flow statements
+3. Follow Up on Late Payments
+Don't feel bad about this! You did the work, you deserve to get paid. A friendly "Hey, just checking on this invoice" email works wonders.
 
-**4. Cash Flow Tools:**
-- QuickBooks, Xero, or FreshBooks
-- Simple spreadsheet tracking
-- Bank account monitoring
-- Regular financial reviews
+How to Keep Money In Your Pocket LONGER:
 
-**5. Warning Signs:**
-- Late payments to suppliers
-- Maxed out credit cards
-- Difficulty paying bills
-- Declining bank balance
+1. Ask Suppliers for Better Payment Terms
+Instead of paying immediately, ask if you can pay in 30 days. Free money for a month!
 
-**💡 Pro Tip**: Upload bank statements or financial reports, and I can help analyze your cash flow patterns!
+2. Use Credit Cards Smartly
+Pay business expenses on a credit card, then pay it off when the bill comes. That's 30 days of keeping your cash in the bank earning interest.
 
-Would you like help creating a cash flow projection for your business?`
+3. Don't Pay Bills Early
+If it's due on the 15th, pay it on the 15th (not the 1st). Keep that money working for you until you actually need to spend it.
+
+Warning Signs Your Cash Flow Needs Help:
+• You're paying bills late (not by choice)
+• Your credit cards are maxed out
+• You're stressed about having enough money next month
+• Your bank balance keeps going down
+
+Simple Tools to Track This:
+• Spreadsheet: Just track what's coming in and going out each month
+• Apps: QuickBooks, Xero, or even a simple banking app
+• The Eyeball Test: Check your bank balance weekly - is it going up or down?
+
+Emergency Fund Rule:
+Try to save up 3-6 months of business expenses. Think of it as your "sleep better at night" fund.
+
+Real Talk: Most small business owners wing this and stress about money constantly. Even a simple spreadsheet tracking your monthly ins and outs will put you ahead of 80% of businesses.
+
+Show me your numbers - upload a bank statement or tell me about your situation, and I'll help you create a simple plan that actually works!`
   }
   
   // General bookkeeping setup
   else if (lowerMessage.includes('setup') || lowerMessage.includes('start') || lowerMessage.includes('begin')) {
-    response = `🏗️ **Setting Up Your Bookkeeping System:**
+    response = `Starting Your Business Bookkeeping - No MBA Required!
 
-**Step 1: Choose Your Business Structure**
-- Sole Proprietorship: Simple, but no liability protection
-- LLC: Good liability protection, flexible
-- Corporation: More complex, potential tax benefits
-- Partnership: Shared ownership and responsibilities
+Let's get your money tracking set up right from the start. Think of this like organizing your personal finances, but with a few extra steps for tax purposes.
 
-**Step 2: Get Required Documents**
-- EIN (Employer Identification Number) from IRS
-- Business license and permits
-- Separate business bank account
-- Business credit card (optional but recommended)
+Step 1: Pick Your Business Type (This Affects Your Taxes)
+Confused by the options? Here's the simple breakdown:
 
-**Step 3: Choose Your Accounting Method**
-- **Cash Basis**: Record when money changes hands (simpler)
-- **Accrual Basis**: Record when transaction occurs (more accurate)
+• Just You, Simple Business (Sole Proprietorship): Easiest to start, but if someone sues you, they can come after your personal stuff
+• You Want Protection (LLC): Costs a bit more to set up, but keeps your business and personal assets separate. Most small businesses choose this
+• You're Thinking Big (Corporation): More paperwork, but potential tax benefits. Usually for businesses planning to have employees or investors
+• You Have a Partner (Partnership): Like sole proprietorship but with shared ownership and headaches
 
-**Step 4: Select Your Tools**
-**Free Options:**
-- Google Sheets/Excel
-- Wave (free accounting software)
-- GnuCash (open source)
+Step 2: Get Your Official Paperwork
+• EIN Number: Think of this like a Social Security number for your business (get it free from IRS.gov - don't pay a service!)
+• Business License: Whatever your city/state requires
+• Business Bank Account: CRUCIAL - never mix business and personal money
+• Business Credit Card: Optional but makes tracking expenses super easy
 
-**Paid Options:**
-- QuickBooks Online ($30-80/month)
-- Xero ($13-70/month)
-- FreshBooks ($15-55/month)
+Step 3: Pick How You Count Money
+• Cash Method: Count money when it actually moves (you get paid = income, you pay a bill = expense). Simpler for most small businesses
+• Accrual Method: Count money when you earn it or owe it, even if no cash moved yet. More accurate but complicated. Required if you make over $25M (if that's you, hire an accountant!)
 
-**Step 5: Set Up Your Chart of Accounts**
-Basic categories:
-- Assets (bank accounts, equipment)
-- Liabilities (loans, credit cards)
-- Equity (owner investments, retained earnings)
-- Revenue (sales, income)
-- Expenses (costs, bills)
+Step 4: Choose Your Tools (Start Simple!)
 
-**Step 6: Establish Processes**
-- Weekly/monthly bookkeeping schedule
-- Receipt collection system
-- Invoice and payment tracking
-- Regular financial reviews
+FREE and Good Enough:
+• Google Sheets or Excel: Honestly, a simple spreadsheet works for many small businesses
+• Wave: Free accounting software that's actually pretty good
+• Your Bank's Tools: Many business accounts have basic tracking
 
-**Step 7: Consider Professional Help**
-- CPA for tax preparation
-- Bookkeeper for ongoing maintenance
-- Financial advisor for planning
+PAID But Worth It:
+• QuickBooks Online: $30-80/month - most popular, connects to everything
+• Xero: $13-70/month - clean, simple, great for service businesses  
+• FreshBooks: $15-55/month - awesome for freelancers and consultants
 
-**💡 Pro Tip**: You can upload existing documents or receipts, and I'll help you set up the right categories and processes!
+My Advice: Start with a spreadsheet or Wave. You can always upgrade later!
 
-What type of business are you setting up? I can provide more specific guidance!`
+Step 5: Set Up Your Money Categories
+Think of these like folders for your money:
+
+• What You Own (Assets): Bank accounts, equipment, money people owe you
+• What You Owe (Liabilities): Credit cards, loans, bills you haven't paid yet
+• Your Ownership (Equity): Money you put into the business, profits you kept
+• Money Coming In (Revenue): Sales, service fees, any income
+• Money Going Out (Expenses): Everything you spend for the business
+
+Step 6: Create Simple Habits
+• Weekly: Snap photos of receipts, update your tracking
+• Monthly: Reconcile your bank account (make sure your records match the bank)
+• Quarterly: Review how you're doing, prepare for tax payments
+• Yearly: Get ready for tax time (or hire someone to do it)
+
+Step 7: Know When to Get Help
+• CPA for Taxes: Usually worth it unless your business is super simple
+• Bookkeeper: If you'd rather focus on your business than counting pennies
+• Financial Advisor: When you're making good money and want to plan for the future
+
+Start Here TODAY: Open a business bank account and start taking photos of all business receipts. That's 80% of good bookkeeping right there!
+
+What type of business are you starting? Tell me and I'll give you specific advice for your situation!`
   }
   
   // Default response for other questions
   else {
-    response = `🤖 **Bookkeeping Assistant Response:**
+    response = `Bookkeeping Assistant Response:
 
 I understand you're asking about: "${message}"
 
 Here's some general bookkeeping guidance:
 
-**Key Principles:**
-1. **Separate Business & Personal**: Always keep business and personal finances separate
-2. **Keep Good Records**: Save receipts, invoices, and bank statements
-3. **Be Consistent**: Use the same system and categories regularly
-4. **Review Regularly**: Check your books monthly or quarterly
-5. **Plan Ahead**: Create budgets and cash flow projections
+Key Principles:
+1. Separate Business & Personal: Always keep business and personal finances separate
+2. Keep Good Records: Save receipts, invoices, and bank statements
+3. Be Consistent: Use the same system and categories regularly
+4. Review Regularly: Check your books monthly or quarterly
+5. Plan Ahead: Create budgets and cash flow projections
 
-**Common Bookkeeping Tasks:**
+Common Bookkeeping Tasks:
 - Recording income and expenses
 - Reconciling bank statements
 - Creating financial reports
 - Managing accounts receivable/payable
 - Preparing for tax time
 
-**Tools You Might Need:**
+Tools You Might Need:
 - Accounting software (QuickBooks, Xero, etc.)
 - Receipt scanner app
 - Business bank account
 - Filing system (digital or physical)
 
-**💡 Pro Tip**: You can upload photos of receipts, invoices, or documents, and I'll help you analyze and categorize them!
+Pro Tip: You can upload photos of receipts, invoices, or documents, and I'll help you analyze and categorize them!
 
 Could you provide more specific details about your question? I can give you more targeted advice for your situation!`
   }
