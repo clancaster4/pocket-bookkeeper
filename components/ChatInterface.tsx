@@ -183,7 +183,7 @@ export default function ChatInterface({
     <div className={`flex flex-col bg-white shadow-lg border border-neutral-200 transition-all duration-300 ${
       shouldExpand 
         ? 'fixed inset-0 w-full h-full z-50 rounded-none' 
-        : 'relative max-w-4xl mx-auto w-full h-[60vh] min-h-[500px] z-20 rounded-lg'
+        : 'relative max-w-4xl mx-auto w-full h-[75vh] min-h-[600px] z-20 rounded-lg'
     }`} style={{ pointerEvents: 'auto' }}>
       {/* Minimize/Maximize Button - Always show */}
       <div className="flex justify-between items-center p-2 sm:p-3 border-b border-neutral-200 bg-neutral-50">
