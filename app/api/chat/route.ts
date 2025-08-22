@@ -161,7 +161,8 @@ function getClientIP(request: NextRequest): string {
     cfConnectingIP,
     requestIP: request.ip,
     userAgent: userAgent.substring(0, 100),
-    clientFingerprint
+    clientFingerprint,
+    isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
   })
   
   let detectedIP = 'unknown'
@@ -169,14 +170,19 @@ function getClientIP(request: NextRequest): string {
   // If we have a client fingerprint, use that for more consistent tracking
   if (clientFingerprint) {
     detectedIP = `fp_${clientFingerprint}`
+    console.log('Using client fingerprint for tracking:', detectedIP)
   } else if (forwarded) {
     detectedIP = forwarded.split(',')[0].trim()
+    console.log('Using forwarded IP for tracking:', detectedIP)
   } else if (realIP) {
     detectedIP = realIP
+    console.log('Using real IP for tracking:', detectedIP)
   } else if (cfConnectingIP) {
     detectedIP = cfConnectingIP
+    console.log('Using CloudFlare IP for tracking:', detectedIP)
   } else {
     detectedIP = request.ip || 'unknown'
+    console.log('Using fallback IP for tracking:', detectedIP)
   }
   
   console.log('Final detected IP/fingerprint:', detectedIP)
@@ -189,6 +195,7 @@ const ipUsageMap = new Map<string, { count: number, resetTime: Date }>()
 // Check and update usage for an IP address using database persistence with fallback
 async function checkAndUpdateUsage(ip: string, limit: number = 5): Promise<{ allowed: boolean, remaining: number, resetTime: Date }> {
   const now = new Date()
+  console.log(`checkAndUpdateUsage called for IP: ${ip}, limit: ${limit}`)
   
   try {
     const db = getDb()
@@ -197,6 +204,13 @@ async function checkAndUpdateUsage(ip: string, limit: number = 5): Promise<{ all
     const existingUsage = await db.query.ipUsage.findFirst({
       where: eq(ipUsage.ipAddress, ip),
     })
+    
+    console.log('Existing usage found:', existingUsage ? {
+      ip: existingUsage.ipAddress,
+      count: existingUsage.queryCount,
+      limit: existingUsage.queryLimit,
+      firstUsed: existingUsage.firstUsed
+    } : 'none')
     
     if (!existingUsage) {
       // Create new IP usage record
