@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'react-hot-toast'
+import { Analytics } from '@vercel/analytics/next'
 import HamburgerMenu from '@/components/HamburgerMenu'
 import SEOScripts from '@/components/SEOScripts'
 import './globals.css'
@@ -114,6 +115,7 @@ export default function RootLayout({
               },
             }}
           />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
