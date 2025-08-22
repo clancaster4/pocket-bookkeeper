@@ -372,7 +372,7 @@ export default function Home() {
               <Calculator className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-neutral-900 mb-3">Smart Expense Tracking</h3>
-            <p className="text-neutral-600 leading-relaxed">Automatically categorize and track business expenses with AI-powered insights</p>
+            <p className="text-neutral-600 leading-relaxed">Confidently categorize and track business expenses with the help of AI-powered insights</p>
           </div>
 
           <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
