@@ -253,7 +253,7 @@ export default function ChatInterface({
             <h3 className="text-xs sm:text-sm font-semibold text-neutral-700 uppercase tracking-wide px-2">Try asking me about:</h3>
             <div className="grid gap-2 sm:gap-3">
               <button
-                onClick={() => setInputMessage("How do I categorize my business expenses for tax purposes?")}
+                onClick={() => onSendMessage("How do I categorize my business expenses for tax purposes?")}
                 className="text-left p-3 sm:p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
@@ -266,7 +266,7 @@ export default function ChatInterface({
               </button>
 
               <button
-                onClick={() => setInputMessage("What tax deductions can I claim as a small business owner?")}
+                onClick={() => onSendMessage("What tax deductions can I claim as a small business owner?")}
                 className="text-left p-3 sm:p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
@@ -279,7 +279,7 @@ export default function ChatInterface({
               </button>
 
               <button
-                onClick={() => setInputMessage("How should I track my business income and expenses?")}
+                onClick={() => onSendMessage("How should I track my business income and expenses?")}
                 className="text-left p-3 sm:p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
