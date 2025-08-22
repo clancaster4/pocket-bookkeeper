@@ -27,7 +27,7 @@ export function getClientFingerprint(): string {
         new Date().getTimezoneOffset().toString(),
         navigator.language || 'unknown',
         (navigator.hardwareConcurrency || 1).toString(),
-        (screen.pixelRatio || 1).toString()
+        ((window.devicePixelRatio || 1)).toString()
       ]
       console.log('Mobile device detected, using simplified fingerprinting')
     } else {
