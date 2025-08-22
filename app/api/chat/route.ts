@@ -211,7 +211,9 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
       userId: existingUser.clerkId,
       count: existingUser.queryCount,
       limit: existingUser.queryLimit,
-      createdAt: existingUser.createdAt
+      createdAt: existingUser.createdAt,
+      tier: existingUser.tier,
+      email: existingUser.email
     } : 'none')
     
     if (!existingUser) {
