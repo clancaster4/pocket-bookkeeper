@@ -180,32 +180,32 @@ export default function ChatInterface({
   const shouldExpand = !isMinimized
 
   return (
-    <div className={`flex flex-col bg-white rounded-lg shadow-lg border border-neutral-200 transition-all duration-300 ${
+    <div className={`flex flex-col bg-white shadow-lg border border-neutral-200 transition-all duration-300 ${
       shouldExpand 
-        ? 'fixed inset-0 w-full h-screen z-50' 
-        : 'relative max-w-4xl mx-auto w-full h-[60vh] min-h-[500px] z-20'
+        ? 'fixed inset-0 w-full h-full z-50 rounded-none sm:inset-2 sm:rounded-lg sm:h-[calc(100vh-1rem)]' 
+        : 'relative max-w-4xl mx-auto w-full h-[60vh] min-h-[500px] z-20 rounded-lg'
     }`} style={{ pointerEvents: 'auto' }}>
       {/* Minimize/Maximize Button - Always show */}
-      <div className="flex justify-between items-center p-2 border-b border-neutral-200">
-        <div className="text-sm font-medium text-neutral-700">
+      <div className="flex justify-between items-center p-3 sm:p-4 border-b border-neutral-200 bg-neutral-50">
+        <div className="text-sm sm:text-base font-medium text-neutral-700">
           {isMinimized ? 'Chat' : 'Chat Interface'}
         </div>
         <button
           onClick={handleMinimizeToggle}
-          className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-neutral-100 rounded-lg transition-colors touch-manipulation"
           title={isMinimized ? 'Maximize chat' : 'Minimize chat'}
         >
           {isMinimized ? (
-            <Maximize2 className="w-4 h-4 text-neutral-600" />
+            <Maximize2 className="w-5 h-5 sm:w-4 sm:h-4 text-neutral-600" />
           ) : (
-            <Minimize2 className="w-4 h-4 text-neutral-600" />
+            <Minimize2 className="w-5 h-5 sm:w-4 sm:h-4 text-neutral-600" />
           )}
         </button>
       </div>
 
       {/* Messages Area - Always show when there are messages */}
       {messages.length > 0 && (
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 min-h-0">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} selectedAIModel={selectedAIModel} />
           ))}
@@ -225,26 +225,26 @@ export default function ChatInterface({
 
     {/* Welcome Message - Show when there are no messages */}
     {messages.length === 0 && (
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <MessageCircle className="w-8 h-8 text-white" />
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+              <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
               Welcome to My AI Bookkeeper!
             </h2>
-            <p className="text-neutral-600">
+            <p className="text-sm sm:text-base text-neutral-600 px-2">
               I'm your AI bookkeeping assistant. How can I help you today?
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide">Try asking me about:</h3>
-            <div className="grid gap-3">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-xs sm:text-sm font-semibold text-neutral-700 uppercase tracking-wide px-2">Try asking me about:</h3>
+            <div className="grid gap-2 sm:gap-3">
               <button
                 onClick={() => setInputMessage("How do I categorize my business expenses for tax purposes?")}
-                className="text-left p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group"
+                className="text-left p-3 sm:p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
                   <Calculator className="w-5 h-5 text-secondary-600 mt-0.5 group-hover:scale-110 transition-transform" />
@@ -257,7 +257,7 @@ export default function ChatInterface({
 
               <button
                 onClick={() => setInputMessage("What tax deductions can I claim as a small business owner?")}
-                className="text-left p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group"
+                className="text-left p-3 sm:p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
                   <DollarSign className="w-5 h-5 text-accent-600 mt-0.5 group-hover:scale-110 transition-transform" />
@@ -270,7 +270,7 @@ export default function ChatInterface({
 
               <button
                 onClick={() => setInputMessage("How should I track my business income and expenses?")}
-                className="text-left p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group"
+                className="text-left p-3 sm:p-4 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors group touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
                   <TrendingUp className="w-5 h-5 text-neutral-600 mt-0.5 group-hover:scale-110 transition-transform" />
@@ -288,7 +288,7 @@ export default function ChatInterface({
 
     {/* File Upload Area */}
     {showFileUpload && (
-      <div className="px-4 pb-4">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4">
         <FileUpload 
           onFileUpload={handleFileUpload}
           disabled={isLoading}
@@ -299,7 +299,7 @@ export default function ChatInterface({
 
     {/* Attachments Preview */}
     {attachments.length > 0 && (
-      <div className="px-4 pb-4">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4">
         <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
           <h4 className="text-sm font-medium text-neutral-700 mb-2">Attachments:</h4>
           <div className="space-y-2">
@@ -345,13 +345,13 @@ export default function ChatInterface({
     )}
 
     {/* Input Area - At the bottom */}
-    <div className="border-t border-neutral-200 p-3 sm:p-6 bg-neutral-50 relative z-30 mt-auto">
+    <div className="border-t border-neutral-200 p-3 sm:p-4 lg:p-6 bg-neutral-50 relative z-30 mt-auto">
       {/* AI Model Selection - Above Input Box */}
-      <div className="mb-4">
+      <div className="mb-3 sm:mb-4">
         <div className="relative">
           <button
             onClick={() => setShowAIDropdown(!showAIDropdown)}
-            className="w-full flex items-center justify-between p-3 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="w-full flex items-center justify-between p-3 sm:p-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors touch-manipulation"
             disabled={isLoading}
           >
             <div className="flex items-center space-x-3">
@@ -452,39 +452,39 @@ export default function ChatInterface({
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask about bookkeeping, upload documents for analysis, or share screenshots..."
-            className="w-full p-3 sm:p-4 border border-neutral-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white shadow-sm cursor-text"
+            className="w-full p-3 sm:p-4 border border-neutral-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white shadow-sm cursor-text text-base"
             rows={1}
             disabled={isLoading}
-            style={{ minHeight: '48px', maxHeight: '120px', pointerEvents: 'auto' }}
+            style={{ minHeight: '52px', maxHeight: '120px', pointerEvents: 'auto' }}
           />
         </div>
         
-        <div className="flex items-center space-x-1 sm:space-x-2">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowFileUpload(!showFileUpload)}
-            className={`p-2 sm:p-3 rounded-xl transition-colors ${
+            className={`p-3 sm:p-3 rounded-xl transition-colors touch-manipulation ${
               showFileUpload 
                 ? 'bg-secondary-100 text-secondary-600' 
                 : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
             }`}
             disabled={isLoading}
           >
-            <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Paperclip className="w-5 h-5" />
           </button>
           
           <button
             onClick={handleSendMessage}
             disabled={isLoading || (!inputMessage.trim() && attachments.length === 0)}
-            className="p-2 sm:p-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="p-3 bg-secondary-500 hover:bg-secondary-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm touch-manipulation"
           >
-            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Send className="w-5 h-5" />
           </button>
         </div>
       </div>
     </div>
 
     {/* Privacy Note */}
-    <div className="mt-3 text-center">
+    <div className="mt-2 sm:mt-3 text-center px-3">
       <p className="text-xs text-neutral-500">
         Please note: For your privacy and security, conversations are <span className="font-bold text-neutral-600">not</span> saved.
       </p>
