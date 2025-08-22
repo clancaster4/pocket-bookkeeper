@@ -559,13 +559,23 @@ Would you like to upgrade your subscription?`,
     }
   }
 
-  // Call Grok API for premium models
+  // Call Grok API for all tiers (including free)
   if ((model === 'advanced-ai' && (userTier === 'basic' || userTier === 'elite')) || 
       (model === 'premium-ai' && userTier === 'elite')) {
     return await callGrokAPI(message, history, model, attachments)
   }
   
-  // Free tier: provide mock responses (standard-ai)
+  // Free tier: Use Grok API with standard model for faster responses
+  if (userTier === 'free' && model === 'standard-ai') {
+    try {
+      return await callGrokAPI(message, history, 'standard-ai', attachments)
+    } catch (error) {
+      console.log('Grok API failed for free user, falling back to mock response:', error)
+      // Fall through to mock response
+    }
+  }
+  
+  // Fallback: provide mock responses if Grok API fails or not configured
   return await getFreeResponse(message, history, attachments)
 }
 
