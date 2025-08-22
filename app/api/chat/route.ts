@@ -1079,6 +1079,8 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       usage: {
         remaining: usageCheck.remaining,
+        count: 5 - usageCheck.remaining,
+        limit: 5,
         resetTime: usageCheck.resetTime.toISOString()
       }
     })

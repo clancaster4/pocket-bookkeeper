@@ -220,17 +220,17 @@ export default function Home() {
       console.log('Messages added successfully')
 
       // Update the usage counter with data from API response
-      if (!isSignedIn && data.usage) {
+      if (data.usage) {
         const { updateUsage } = useAppStore.getState()
-        const totalUsed = 5 - data.usage.remaining
         console.log('About to update usage:', { 
-          totalUsed, 
+          count: data.usage.count,
           remaining: data.usage.remaining, 
+          limit: data.usage.limit,
           isSignedIn, 
           hasUsageData: !!data.usage,
-          userAgent: navigator.userAgent.substring(0, 100)
+          apiUsageData: data.usage
         })
-        updateUsage(totalUsed, 5)
+        updateUsage(data.usage.count, data.usage.limit)
         console.log('Usage updated successfully')
         
         // Verify the update worked
