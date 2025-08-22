@@ -12,8 +12,7 @@ import {
   BookOpen,
   Home,
   ChevronRight,
-  Sparkles,
-  Settings
+  Sparkles
 } from 'lucide-react'
 
 export default function HamburgerMenu() {
@@ -80,14 +79,7 @@ export default function HamburgerMenu() {
     }
   ]
 
-  const accountMenuItem = {
-    href: '/account',
-    label: 'Manage Account',
-    icon: Settings,
-    description: 'Subscription & account settings'
-  }
-
-  const menuItems = isSignedIn ? [...baseMenuItems, accountMenuItem] : baseMenuItems
+  const menuItems = baseMenuItems
 
   return (
     <>
