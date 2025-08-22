@@ -88,12 +88,8 @@ STRICT RULES:
 
     const aiResponse = data.choices[0].message.content
 
-    // Add model identifier to response
-    const modelName = model === 'premium-ai' ? 'Elite AI (Grok-4)' : 'Advanced AI (Grok-3-mini)'
-    const responseWithModel = `${aiResponse}\n\n🤖 **Powered by ${modelName}**: This response was generated using Grok's advanced AI model for superior bookkeeping guidance.`
-
     return {
-      response: responseWithModel,
+      response: aiResponse,
       modelUsed: model
     }
 
@@ -817,9 +813,6 @@ Here's some general bookkeeping guidance:
 
 Could you provide more specific details about your question? I can give you more targeted advice for your situation!`
   }
-  
-  // Add model identifier for free tier
-  response += `\n\n🤖 **Powered by Standard AI**: This response was generated using our basic AI model. Upgrade to Everyday Assistant or Elite Advisor for advanced AI capabilities.`
   
   return {
     response,
