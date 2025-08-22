@@ -131,9 +131,8 @@ I'm experiencing a temporary connection issue with the advanced AI service. Here
   }
 }
 
-// In-memory storage for demo purposes (fallback)
-// In production, use a proper database like PostgreSQL, Redis, or MongoDB
-const ipUsageMap = new Map<string, { count: number, lastReset: Date }>()
+import { getDb, ipUsage, NewIpUsage } from '@/lib/db'
+import { eq } from 'drizzle-orm'
 
 // Get client IP address (fallback for unauthenticated users)
 function getClientIP(request: NextRequest): string {
@@ -156,47 +155,80 @@ function getClientIP(request: NextRequest): string {
   return request.ip || 'unknown'
 }
 
-// Check and update usage for an IP address
-function checkAndUpdateUsage(ip: string, limit: number = 5): { allowed: boolean, remaining: number, resetTime: Date } {
+// Check and update usage for an IP address using database persistence
+async function checkAndUpdateUsage(ip: string, limit: number = 5): Promise<{ allowed: boolean, remaining: number, resetTime: Date }> {
+  const db = getDb()
   const now = new Date()
-  const currentUsage = ipUsageMap.get(ip)
   
-  // If no usage recorded yet, initialize
-  if (!currentUsage) {
-    ipUsageMap.set(ip, { count: 1, lastReset: now })
-    return { allowed: true, remaining: limit - 1, resetTime: now }
-  }
-  
-  // Check if user has exceeded limit (no monthly reset)
-  if (currentUsage.count >= limit) {
-    return { allowed: false, remaining: 0, resetTime: currentUsage.lastReset }
-  }
-  
-  // Increment usage
-  currentUsage.count++
-  ipUsageMap.set(ip, currentUsage)
-  
-  return { 
-    allowed: true, 
-    remaining: limit - currentUsage.count, 
-    resetTime: currentUsage.lastReset 
+  try {
+    // Check if IP exists in database
+    const existingUsage = await db.query.ipUsage.findFirst({
+      where: eq(ipUsage.ipAddress, ip),
+    })
+    
+    if (!existingUsage) {
+      // Create new IP usage record
+      const newUsage: NewIpUsage = {
+        ipAddress: ip,
+        queryCount: 1,
+        queryLimit: limit,
+        firstUsed: now,
+        lastUsed: now,
+      }
+      
+      await db.insert(ipUsage).values(newUsage)
+      return { allowed: true, remaining: limit - 1, resetTime: now }
+    }
+    
+    // Check if user has exceeded limit
+    if (existingUsage.queryCount >= limit) {
+      return { allowed: false, remaining: 0, resetTime: existingUsage.firstUsed }
+    }
+    
+    // Increment usage count
+    const newCount = existingUsage.queryCount + 1
+    await db.update(ipUsage)
+      .set({ 
+        queryCount: newCount,
+        lastUsed: now,
+        updatedAt: now
+      })
+      .where(eq(ipUsage.ipAddress, ip))
+    
+    return { 
+      allowed: true, 
+      remaining: limit - newCount, 
+      resetTime: existingUsage.firstUsed 
+    }
+  } catch (error) {
+    console.error('Database error in checkAndUpdateUsage:', error)
+    // Fallback to allow request if database fails
+    return { allowed: true, remaining: 4, resetTime: now }
   }
 }
 
-// Get usage info for an IP address
-function getUsageInfo(ip: string, limit: number = 5): { count: number, remaining: number, resetTime: Date } {
-  const currentUsage = ipUsageMap.get(ip)
+// Get usage info for an IP address using database
+async function getUsageInfo(ip: string, limit: number = 5): Promise<{ count: number, remaining: number, resetTime: Date }> {
+  const db = getDb()
   const now = new Date()
   
-  if (!currentUsage) {
+  try {
+    const existingUsage = await db.query.ipUsage.findFirst({
+      where: eq(ipUsage.ipAddress, ip),
+    })
+    
+    if (!existingUsage) {
+      return { count: 0, remaining: limit, resetTime: now }
+    }
+    
+    return { 
+      count: existingUsage.queryCount, 
+      remaining: Math.max(0, limit - existingUsage.queryCount), 
+      resetTime: existingUsage.firstUsed 
+    }
+  } catch (error) {
+    console.error('Database error in getUsageInfo:', error)
     return { count: 0, remaining: limit, resetTime: now }
-  }
-  
-  // No monthly reset - return current usage
-  return { 
-    count: currentUsage.count, 
-    remaining: Math.max(0, limit - currentUsage.count), 
-    resetTime: currentUsage.lastReset 
   }
 }
 
@@ -823,7 +855,7 @@ export async function POST(request: NextRequest) {
     
     // For now, use IP-based tracking
     clientIP = getClientIP(request)
-    usageCheck = checkAndUpdateUsage(clientIP, 5)
+    usageCheck = await checkAndUpdateUsage(clientIP, 5)
     
     if (!usageCheck.allowed) {
       return NextResponse.json(
@@ -937,7 +969,7 @@ export async function GET(request: NextRequest) {
     
     // For now, use IP-based tracking
     clientIP = getClientIP(request)
-    usageInfo = getUsageInfo(clientIP, 5)
+    usageInfo = await getUsageInfo(clientIP, 5)
     
     return NextResponse.json({
       ip: clientIP,

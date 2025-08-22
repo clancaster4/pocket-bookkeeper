@@ -9,7 +9,11 @@
       "Bash(npm install:*)",
       "Bash(git add:*)",
       "Bash(git push:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(nslookup:*)",
+      "WebFetch(domain:myaibookkeeper.app)",
+      "Bash(npx drizzle-kit generate:pg:*)",
+      "Bash(npx drizzle-kit:*)"
     ],
     "deny": []
   }

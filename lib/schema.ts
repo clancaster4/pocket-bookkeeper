@@ -82,6 +82,21 @@ export const stripeCustomers = pgTable('stripe_customers', {
   subscriptionIdIdx: index('idx_stripe_customers_subscription_id').on(table.subscriptionId),
 }))
 
+// IP Usage tracking table - for anonymous/free users
+export const ipUsage = pgTable('ip_usage', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  ipAddress: varchar('ip_address', { length: 45 }).notNull(), // IPv4 or IPv6
+  queryCount: integer('query_count').notNull().default(0),
+  queryLimit: integer('query_limit').notNull().default(5),
+  firstUsed: timestamp('first_used').notNull().defaultNow(),
+  lastUsed: timestamp('last_used').notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  ipAddressIdx: index('idx_ip_usage_ip_address').on(table.ipAddress),
+  lastUsedIdx: index('idx_ip_usage_last_used').on(table.lastUsed),
+}))
+
 // Define relationships
 export const usersRelations = relations(users, ({ many }) => ({
   subscriptionEvents: many(subscriptionEvents),
@@ -121,6 +136,8 @@ export const insertUsageAnalyticsSchema = createInsertSchema(usageAnalytics)
 export const selectUsageAnalyticsSchema = createSelectSchema(usageAnalytics)
 export const insertStripeCustomerSchema = createInsertSchema(stripeCustomers)
 export const selectStripeCustomerSchema = createSelectSchema(stripeCustomers)
+export const insertIpUsageSchema = createInsertSchema(ipUsage)
+export const selectIpUsageSchema = createSelectSchema(ipUsage)
 
 // Export types for easier use
 export type User = typeof users.$inferSelect
@@ -131,3 +148,5 @@ export type UsageAnalytics = typeof usageAnalytics.$inferSelect
 export type NewUsageAnalytics = typeof usageAnalytics.$inferInsert
 export type StripeCustomer = typeof stripeCustomers.$inferSelect
 export type NewStripeCustomer = typeof stripeCustomers.$inferInsert
+export type IpUsage = typeof ipUsage.$inferSelect
+export type NewIpUsage = typeof ipUsage.$inferInsert
