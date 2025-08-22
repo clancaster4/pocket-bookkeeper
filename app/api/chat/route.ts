@@ -571,8 +571,8 @@ Would you like to upgrade your subscription?`,
 
 // Mock AI response function for free tier users
 async function getFreeResponse(message: string, history: any[], attachments?: any[]): Promise<{ response: string, modelUsed: string }> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
+  // Simulate API delay (reduced for better UX)
+  await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500))
   
   // Analyze the user's message and attachments to provide relevant bookkeeping guidance
   const lowerMessage = message.toLowerCase()
