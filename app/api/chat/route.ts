@@ -226,7 +226,7 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
         clerkId: userId,
         email: userEmail,
         tier: 'free',
-        queryCount: 1,
+        queryCount: 0,
         queryLimit: 5,
         subscriptionStatus: 'active',
       }
@@ -234,6 +234,12 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
       try {
         await db.insert(users).values(newUser)
         console.log('Successfully created new user:', { clerkId: userId, email: userEmail })
+        
+        // Now increment the count for the current message
+        await db.update(users)
+          .set({ queryCount: 1, updatedAt: now })
+          .where(eq(users.clerkId, userId))
+        
         return { allowed: true, remaining: 4, resetTime: now }
       } catch (error) {
         console.error('Error creating new user:', error)
@@ -246,8 +252,26 @@ async function checkAndUpdateUsage(userId: string, limit: number = 5): Promise<{
       return { allowed: false, remaining: 0, resetTime: existingUser.createdAt }
     }
     
+    // Special case: If user was created today and has queryCount >= 5, 
+    // they might have been affected by the bug. Reset their count.
+    const today = new Date().toDateString()
+    const userCreatedToday = existingUser.createdAt.toDateString() === today
+    if (userCreatedToday && existingUser.queryCount >= 5) {
+      console.log('Resetting query count for user created today with bug:', userId)
+      await db.update(users)
+        .set({ queryCount: 0, updatedAt: now })
+        .where(eq(users.clerkId, userId))
+      // Continue with the normal flow to increment count
+    }
+    
+    // Get current count (might have been reset above)
+    let currentCount = existingUser.queryCount
+    if (userCreatedToday && existingUser.queryCount >= 5) {
+      currentCount = 0 // Use reset count
+    }
+    
     // Increment usage count
-    const newCount = existingUser.queryCount + 1
+    const newCount = currentCount + 1
     await db.update(users)
       .set({ 
         queryCount: newCount,
