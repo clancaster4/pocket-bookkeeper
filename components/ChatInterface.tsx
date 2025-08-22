@@ -205,7 +205,7 @@ export default function ChatInterface({
 
       {/* Messages Area - Always show when there are messages */}
       {messages.length > 0 && (
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6 min-h-0">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-3 sm:space-y-4 min-h-0">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} selectedAIModel={selectedAIModel} />
           ))}

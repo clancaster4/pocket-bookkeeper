@@ -41,9 +41,9 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
   }
 
   return (
-    <div className={`flex items-start space-x-4 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+    <div className={`flex items-start space-x-3 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
       {/* Avatar */}
-      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
         message.role === 'user' 
           ? 'bg-gradient-to-r from-slate-400 to-slate-500' 
           : selectedAIModel === 'elite'
@@ -51,11 +51,11 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
             : 'bg-gradient-to-r from-green-600 to-green-700'
       }`}>
         {message.role === 'user' ? (
-          <User className="w-5 h-5 text-white" />
+          <User className="w-4 h-4 text-white" />
         ) : selectedAIModel === 'elite' ? (
-          <span className="text-xl">👑</span>
+          <span className="text-lg">👑</span>
         ) : (
-          <Calculator className="w-5 h-5 text-white" />
+          <Calculator className="w-4 h-4 text-white" />
         )}
       </div>
 
@@ -64,9 +64,9 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
         {/* Message Text */}
         {message.content && (
           <div className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
-            <div className="prose prose-sm max-w-none">
+            <div className="prose prose-xs max-w-none">
               {message.content.split('\n').map((line, index) => (
-                <p key={index} className={line.trim() === '' ? 'mb-2' : 'mb-1 last:mb-0'}>
+                <p key={index} className={line.trim() === '' ? 'mb-1' : 'mb-0.5 last:mb-0'}>
                   {line}
                 </p>
               ))}
@@ -139,7 +139,7 @@ export default function ChatMessage({ message, selectedAIModel = 'everyday' }: C
         )}
 
         {/* Timestamp */}
-        <div className={`text-xs text-neutral-500 mt-2 ${message.role === 'user' ? 'text-right' : ''}`}>
+        <div className={`text-xs text-neutral-500 mt-1 ${message.role === 'user' ? 'text-right' : ''}`}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
