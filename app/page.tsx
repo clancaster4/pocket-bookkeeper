@@ -193,10 +193,12 @@ export default function Home() {
 
       console.log('Messages added successfully')
 
-      // Update the usage counter for unauthenticated users
-      if (!isSignedIn) {
-        const { incrementQueryCount } = useAppStore.getState()
-        incrementQueryCount()
+      // Update the usage counter with data from API response
+      if (!isSignedIn && data.usage) {
+        const { updateUsage } = useAppStore.getState()
+        const totalUsed = 5 - data.usage.remaining
+        updateUsage(totalUsed, 5)
+        console.log('Updated usage from API response:', { totalUsed, remaining: data.usage.remaining })
       }
 
     } catch (error) {
