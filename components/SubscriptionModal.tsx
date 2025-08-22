@@ -170,10 +170,6 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                   </li>
                   <li className="flex items-start space-x-3">
                     <Check className="w-5 h-5 text-secondary-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-neutral-700">Chat history & export</span>
-                  </li>
-                  <li className="flex items-start space-x-3">
-                    <Check className="w-5 h-5 text-secondary-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-neutral-700">Personalized insights</span>
                   </li>
                   <li className="flex items-start space-x-3">
