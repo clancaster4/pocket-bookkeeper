@@ -138,21 +138,39 @@ export default function ChatInterface({
 
   // Get available AI models based on subscription
   const getAvailableModels = (): AIModel[] => {
-    if (subscription.tier === 'free') {
-      return [
-        { id: 'everyday', name: 'Everyday Assistant', icon: BookOpen, available: true },
-        { id: 'elite', name: 'Elite Advisor', icon: Sparkles, available: false } // Show but not available for free users
-      ]
-    } else {
+    if (subscription.tier === 'elite') {
+      // Elite subscribers get access to both models
       return [
         { id: 'everyday', name: 'Everyday Assistant', icon: BookOpen, available: true },
         { id: 'elite', name: 'Elite Advisor', icon: Sparkles, available: true }
+      ]
+    } else if (subscription.tier === 'basic') {
+      // Basic subscribers only get Everyday Assistant
+      return [
+        { id: 'everyday', name: 'Everyday Assistant', icon: BookOpen, available: true },
+        { id: 'elite', name: 'Elite Advisor', icon: Sparkles, available: false }
+      ]
+    } else {
+      // Free users get Everyday Assistant and can see Elite for upgrade
+      return [
+        { id: 'everyday', name: 'Everyday Assistant', icon: BookOpen, available: true },
+        { id: 'elite', name: 'Elite Advisor', icon: Sparkles, available: false }
       ]
     }
   }
 
   const availableModels = getAvailableModels()
-  const currentModel = availableModels.find(model => model.id === selectedAIModel) || availableModels[0]
+  
+  // Ensure the selected model is available to the user, otherwise default to first available
+  const currentModel = availableModels.find(model => model.id === selectedAIModel && model.available) || availableModels.find(model => model.available) || availableModels[0]
+  
+  // Update selected model if it's not available to prevent confusion
+  useEffect(() => {
+    if (selectedAIModel !== currentModel.id) {
+      setSelectedAIModel(currentModel.id)
+      onAIModelChange?.(currentModel.id)
+    }
+  }, [currentModel.id, selectedAIModel, onAIModelChange])
 
   const handleAIModelChange = (modelId: string) => {
     setSelectedAIModel(modelId)

@@ -1065,16 +1065,32 @@ export async function POST(request: NextRequest) {
       modelToUse = 'advanced-ai'
     }
 
-    // Get user subscription tier (mock implementation for now)
-    // In production, get this from database based on userId
+    // Get user's actual subscription tier from database
     let userTier = 'free' // Default to free tier
     
-    // Mock tier determination based on aiModel selection
-    // In production, this should come from actual subscription database
-    if (aiModel === 'elite') {
-      userTier = 'elite' // Only allow if user actually has elite subscription
-    } else if (aiModel === 'everyday') {
-      userTier = 'basic' // Only allow if user actually has basic subscription
+    if (userId) {
+      try {
+        const db = getDb()
+        const existingUser = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1)
+        if (existingUser.length > 0) {
+          userTier = existingUser[0].tier
+          console.log(`User ${userId} has tier: ${userTier}`)
+        }
+      } catch (error) {
+        console.error('Error getting user tier:', error)
+        // Keep default free tier on error
+      }
+    }
+    
+    // Validate model access based on user's actual subscription tier
+    if (aiModel === 'elite' && userTier !== 'elite') {
+      console.log(`User ${userId} attempted to use Elite model but has tier: ${userTier}`)
+      // Force to everyday model for non-elite users
+      modelToUse = userTier === 'basic' ? 'advanced-ai' : 'standard-ai'
+    } else if (aiModel === 'everyday' && userTier === 'free') {
+      console.log(`User ${userId} attempted to use Everyday model but is free tier`)
+      // Force to standard model for free users
+      modelToUse = 'standard-ai'
     }
 
     // Get AI response
