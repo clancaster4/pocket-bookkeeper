@@ -4,10 +4,17 @@ import Stripe from 'stripe'
 import { getDb } from '@/lib/db'
 import { users } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
+import { pricingPlans } from '@/lib/stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 })
+
+// Helper function to get plan name from price ID
+function getPlanNameFromPriceId(priceId: string): string {
+  const plan = pricingPlans.find(p => p.priceId === priceId)
+  return plan?.name || 'Unknown Plan'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -174,13 +181,17 @@ export async function GET(request: NextRequest) {
 
         for (const subscription of subscriptions.data) {
           if (subscription.status === 'active' || subscription.cancel_at_period_end) {
+            // Get the price ID from the subscription item
+            const priceId = subscription.items.data[0]?.price?.id
+            const planName = priceId ? getPlanNameFromPriceId(priceId) : 'Unknown Plan'
+            
             activeSubscriptions.push({
               id: subscription.id,
               status: subscription.status,
               cancel_at_period_end: subscription.cancel_at_period_end,
               current_period_end: subscription.current_period_end,
               canceled_at: subscription.canceled_at,
-              plan_name: subscription.items.data[0]?.price?.nickname || 'Unknown Plan'
+              plan_name: planName
             })
           }
         }
