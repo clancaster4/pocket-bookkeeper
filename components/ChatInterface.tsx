@@ -186,7 +186,7 @@ export default function ChatInterface({
         : 'relative max-w-4xl mx-auto w-full h-[60vh] min-h-[500px] z-20 rounded-lg'
     }`} style={{ pointerEvents: 'auto' }}>
       {/* Minimize/Maximize Button - Always show */}
-      <div className="flex justify-between items-center p-3 sm:p-4 border-b border-neutral-200 bg-neutral-50">
+      <div className="flex justify-between items-center p-2 sm:p-3 border-b border-neutral-200 bg-neutral-50">
         <div className="text-sm sm:text-base font-medium text-neutral-700">
           {isMinimized ? 'Chat' : 'Chat Interface'}
         </div>
@@ -205,7 +205,7 @@ export default function ChatInterface({
 
       {/* Messages Area - Always show when there are messages */}
       {messages.length > 0 && (
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 min-h-0">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6 min-h-0">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} selectedAIModel={selectedAIModel} />
           ))}
@@ -225,9 +225,9 @@ export default function ChatInterface({
 
     {/* Welcome Message - Show when there are no messages */}
     {messages.length === 0 && (
-      <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-6 sm:mb-8">
+          <div className="text-center mb-4 sm:mb-6">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
               <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
@@ -239,7 +239,7 @@ export default function ChatInterface({
             </p>
           </div>
 
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-2 sm:space-y-3">
             <h3 className="text-xs sm:text-sm font-semibold text-neutral-700 uppercase tracking-wide px-2">Try asking me about:</h3>
             <div className="grid gap-2 sm:gap-3">
               <button
@@ -345,13 +345,13 @@ export default function ChatInterface({
     )}
 
     {/* Input Area - At the bottom */}
-    <div className="border-t border-neutral-200 p-3 sm:p-4 lg:p-6 bg-neutral-50 relative z-30 mt-auto">
+    <div className="border-t border-neutral-200 p-3 sm:p-4 bg-neutral-50 relative z-30 mt-auto">
       {/* AI Model Selection - Above Input Box */}
-      <div className="mb-3 sm:mb-4">
+      <div className="mb-2 sm:mb-3">
         <div className="relative">
           <button
             onClick={() => setShowAIDropdown(!showAIDropdown)}
-            className="w-full flex items-center justify-between p-3 sm:p-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors touch-manipulation"
+            className="w-full flex items-center justify-between p-2 sm:p-3 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors touch-manipulation"
             disabled={isLoading}
           >
             <div className="flex items-center space-x-3">
@@ -484,7 +484,7 @@ export default function ChatInterface({
     </div>
 
     {/* Privacy Note */}
-    <div className="mt-2 sm:mt-3 text-center px-3">
+    <div className="mt-1 sm:mt-2 text-center px-3">
       <p className="text-xs text-neutral-500">
         Please note: For your privacy and security, conversations are <span className="font-bold text-neutral-600">not</span> saved.
       </p>
