@@ -60,6 +60,12 @@ export default function HamburgerMenu() {
       description: 'Chat with AI Assistant'
     },
     {
+      href: '/blog',
+      label: 'Blog',
+      icon: BookOpen,
+      description: 'Tips & guides for bookkeeping'
+    },
+    {
       href: '/about',
       label: 'About',
       icon: Info,
