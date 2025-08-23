@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, PiggyBank, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Retained Earnings: How They Fuel Your Business's Future Growth',
+  title: "Retained Earnings: How They Fuel Your Business's Future Growth",
   description: 'Understand how retained earnings drive growth and learn strategies for optimal profit retention and reinvestment.',
   keywords: ['retained earnings management', 'profit retention strategies', 'reinvestment decisions', 'dividend policy', 'growth financing'],
   openGraph: {
-    title: 'Retained Earnings: How They Fuel Your Business's Future Growth',
+    title: "Retained Earnings: How They Fuel Your Business's Future Growth",
     description: 'Understand how retained earnings drive growth and learn strategies for optimal profit retention and reinvestment.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/retained-earnings-fuel-business-future-growth',

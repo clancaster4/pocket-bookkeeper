@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, AlertCircle, DollarSign, TrendingDown, Shield, BarChart3, CreditCard } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Managing Liabilities: How to Keep Your Business\'s Debts in Check',
+  title: "Managing Liabilities: How to Keep Your Business's Debts in Check",
   description: 'Master liability management for business success. Learn about current and long-term liabilities, debt optimization strategies, and how to maintain healthy debt-to-equity ratios.',
   keywords: [
     'business liabilities management',
@@ -250,11 +250,11 @@ export default function ManagingLiabilities() {
                   </li>
                   <li className="flex items-start">
                     <BarChart3 className="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span><strong>Quick Ratio:</strong> (Current Assets - Inventory) ÷ Current Liabilities (Target: >1.0)</span>
+                    <span><strong>Quick Ratio:</strong> (Current Assets - Inventory) ÷ Current Liabilities (Target: &gt;1.0)</span>
                   </li>
                   <li className="flex items-start">
                     <BarChart3 className="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span><strong>Cash Ratio:</strong> Cash ÷ Current Liabilities (Target: >0.2)</span>
+                    <span><strong>Cash Ratio:</strong> Cash ÷ Current Liabilities (Target: &gt;0.2)</span>
                   </li>
                 </ul>
               </div>
@@ -263,15 +263,15 @@ export default function ManagingLiabilities() {
                 <ul className="space-y-2 text-sm text-neutral-700">
                   <li className="flex items-start">
                     <BarChart3 className="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span><strong>Debt-to-Equity:</strong> Total Debt ÷ Total Equity (Target: <2.0)</span>
+                    <span><strong>Debt-to-Equity:</strong> Total Debt ÷ Total Equity (Target: &lt;2.0)</span>
                   </li>
                   <li className="flex items-start">
                     <BarChart3 className="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span><strong>Debt Service Coverage:</strong> EBITDA ÷ Debt Payments (Target: >1.25)</span>
+                    <span><strong>Debt Service Coverage:</strong> EBITDA ÷ Debt Payments (Target: &gt;1.25)</span>
                   </li>
                   <li className="flex items-start">
                     <BarChart3 className="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                    <span><strong>Interest Coverage:</strong> EBIT ÷ Interest Expense (Target: >3.0)</span>
+                    <span><strong>Interest Coverage:</strong> EBIT ÷ Interest Expense (Target: &gt;3.0)</span>
                   </li>
                 </ul>
               </div>

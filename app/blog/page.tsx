@@ -159,8 +159,8 @@ const blogPosts = [
   },
   {
     slug: 'equity-explained-company-financial-health',
-    title: 'Equity Explained: What It Means for Your Company\'s Financial Health',
-    excerpt: 'Understand business equity, its components, and how it reflects your company\'s true value and financial health.',
+    title: "Equity Explained: What It Means for Your Company's Financial Health",
+    excerpt: "Understand business equity, its components, and how it reflects your company's true value and financial health.",
     date: '2024-12-29',
     readTime: '8 min read',
     icon: PieChart,
@@ -189,7 +189,7 @@ const blogPosts = [
   },
   {
     slug: 'net-income-ultimate-measure-profitability',
-    title: 'Net Income: Why It\'s the Ultimate Measure of Profitability',
+    title: "Net Income: Why It's the Ultimate Measure of Profitability",
     excerpt: 'Master net income analysis to understand true profitability and make data-driven business decisions.',
     date: '2024-12-29',
     readTime: '7 min read',
@@ -279,7 +279,7 @@ const blogPosts = [
   },
   {
     slug: 'retained-earnings-fuel-business-future-growth',
-    title: 'Retained Earnings: How They Fuel Your Business\'s Future Growth',
+    title: "Retained Earnings: How They Fuel Your Business's Future Growth",
     excerpt: 'Understand how retained earnings drive growth and optimal profit retention strategies.',
     date: '2024-12-29',
     readTime: '8 min read',
@@ -299,7 +299,7 @@ const blogPosts = [
   },
   {
     slug: 'operating-income-measuring-business-core-performance',
-    title: 'Operating Income: Measuring Your Business\'s Core Performance',
+    title: "Operating Income: Measuring Your Business's Core Performance",
     excerpt: 'Master operating income analysis to evaluate core business performance.',
     date: '2024-12-29',
     readTime: '8 min read',
@@ -339,8 +339,8 @@ const blogPosts = [
   },
   {
     slug: 'shareholders-equity-what-tells-investors',
-    title: 'Shareholders\' Equity: What It Tells Investors About Your Company',
-    excerpt: 'Understand how shareholders\' equity reflects company value to investors.',
+    title: "Shareholders' Equity: What It Tells Investors About Your Company",
+    excerpt: "Understand how shareholders' equity reflects company value to investors.",
     date: '2024-12-29',
     readTime: '8 min read',
     icon: Users,

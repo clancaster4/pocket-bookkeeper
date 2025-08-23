@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, TrendingUp, DollarSign, BarChart3, Target, AlertCircle, Shield, FileText, Users, Package, Calculator } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Employee Productivity Metrics: How to Measure and Boost Your Team's Performance',
+  title: "Employee Productivity Metrics: How to Measure and Boost Your Team's Performance",
   description: 'Explore key metrics like revenue per employee, with tips on improving workforce efficiency in small business.',
   keywords: ['employee productivity', 'revenue per employee', 'workforce efficiency', 'performance metrics', 'team productivity'],
   openGraph: {
-    title: 'Employee Productivity Metrics: How to Measure and Boost Your Team's Performance',
+    title: "Employee Productivity Metrics: How to Measure and Boost Your Team's Performance",
     description: 'Explore key metrics like revenue per employee, with tips on improving workforce efficiency in small business.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/employee-productivity-metrics-how-to-measure-and-boost-your-teams-performance',

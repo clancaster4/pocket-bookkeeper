@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, TrendingUp, DollarSign, BarChart3, Target, AlertCircle, Shield, FileText, Users, Package, Calculator } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'The Small Business Owner's Guide to Tracking Cash Flow with Bookkeeping',
+  title: "The Small Business Owner's Guide to Tracking Cash Flow with Bookkeeping",
   description: 'Learn how effective bookkeeping helps monitor cash flow, with strategies to avoid cash crunches and plan for growth.',
   keywords: ['cash flow tracking', 'cash flow management', 'bookkeeping for cash flow', 'financial planning', 'cash flow forecasting'],
   openGraph: {
-    title: 'The Small Business Owner's Guide to Tracking Cash Flow with Bookkeeping',
+    title: "The Small Business Owner's Guide to Tracking Cash Flow with Bookkeeping",
     description: 'Learn how effective bookkeeping helps monitor cash flow, with strategies to avoid cash crunches and plan for growth.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/the-small-business-owners-guide-to-tracking-cash-flow-with-bookkeeping',

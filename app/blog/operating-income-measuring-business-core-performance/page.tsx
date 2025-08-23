@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, Activity, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Operating Income: Measuring Your Business's Core Performance',
+  title: "Operating Income: Measuring Your Business's Core Performance",
   description: 'Master operating income analysis to evaluate core business performance and identify improvement opportunities.',
   keywords: ['operating income analysis', 'EBIT calculation', 'operational efficiency', 'core business profitability', 'operating margin'],
   openGraph: {
-    title: 'Operating Income: Measuring Your Business's Core Performance',
+    title: "Operating Income: Measuring Your Business's Core Performance",
     description: 'Master operating income analysis to evaluate core business performance and identify improvement opportunities.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/operating-income-measuring-business-core-performance',

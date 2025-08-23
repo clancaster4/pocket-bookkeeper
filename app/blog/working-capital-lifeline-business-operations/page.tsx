@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, RefreshCw, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Working Capital: The Lifeline of Your Business's Day-to-Day Operations',
+  title: "Working Capital: The Lifeline of Your Business's Day-to-Day Operations",
   description: 'Understand working capital management to ensure smooth operations, meet obligations, and support business growth.',
   keywords: ['working capital management', 'working capital optimization', 'cash conversion cycle', 'liquidity management', 'operational funding'],
   openGraph: {
-    title: 'Working Capital: The Lifeline of Your Business's Day-to-Day Operations',
+    title: "Working Capital: The Lifeline of Your Business's Day-to-Day Operations",
     description: 'Understand working capital management to ensure smooth operations, meet obligations, and support business growth.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/working-capital-lifeline-business-operations',

@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, TrendingUp, DollarSign, BarChart3, Target, AlertCircle, Shield, FileText, Users, Package, Calculator } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Why Gross Profit Margin Is Your Small Business's Key to Sustainable Growth',
+  title: "Why Gross Profit Margin Is Your Small Business's Key to Sustainable Growth",
   description: 'Learn to calculate and interpret gross profit margin, with strategies to improve it by optimizing pricing and reducing COGS.',
   keywords: ['gross profit margin', 'profit margin calculation', 'pricing optimization', 'cost of goods sold', 'business profitability'],
   openGraph: {
-    title: 'Why Gross Profit Margin Is Your Small Business's Key to Sustainable Growth',
+    title: "Why Gross Profit Margin Is Your Small Business's Key to Sustainable Growth",
     description: 'Learn to calculate and interpret gross profit margin, with strategies to improve it by optimizing pricing and reducing COGS.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/why-gross-profit-margin-is-your-small-businesss-key-to-sustainable-growth',

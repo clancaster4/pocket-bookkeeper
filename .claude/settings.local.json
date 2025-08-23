@@ -19,7 +19,8 @@
       "Bash(npm run lint)",
       "Bash(npx tsc:*)",
       "Bash(git commit:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git pull:*)"
     ],
     "deny": []
   }

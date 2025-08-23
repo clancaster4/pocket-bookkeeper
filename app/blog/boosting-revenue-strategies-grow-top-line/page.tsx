@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Calendar, CheckCircle, TrendingUp, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar, CheckCircle, TrendingUp, DollarSign, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Boosting Revenue: Top Strategies to Grow Your Top Line',

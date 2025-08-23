@@ -1,13 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Calendar, CheckCircle, Target, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar, CheckCircle, Target, DollarSign, TrendingUp, BarChart3, AlertCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Net Income: Why It's the Ultimate Measure of Profitability',
+  title: "Net Income: Why It's the Ultimate Measure of Profitability",
   description: 'Master net income analysis to understand true profitability, improve margins, and make data-driven business decisions.',
   keywords: ['net income calculation', 'bottom line profit', 'net profit margin', 'profitability metrics', 'net income vs gross profit'],
   openGraph: {
-    title: 'Net Income: Why It's the Ultimate Measure of Profitability',
+    title: "Net Income: Why It's the Ultimate Measure of Profitability",
     description: 'Master net income analysis to understand true profitability, improve margins, and make data-driven business decisions.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/net-income-ultimate-measure-profitability',

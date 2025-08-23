@@ -3,12 +3,12 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, PieChart, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Equity Explained: What It Means for Your Company's Financial Health',
-  description: 'Understand business equity, its components, and how it reflects your company's true value and financial health.',
+  title: "Equity Explained: What It Means for Your Company's Financial Health",
+  description: "Understand business equity, its components, and how it reflects your company's true value and financial health.",
   keywords: ['shareholders equity', 'owner equity', 'retained earnings', 'equity financing', 'equity vs debt'],
   openGraph: {
-    title: 'Equity Explained: What It Means for Your Company's Financial Health',
-    description: 'Understand business equity, its components, and how it reflects your company's true value and financial health.',
+    title: "Equity Explained: What It Means for Your Company's Financial Health",
+    description: "Understand business equity, its components, and how it reflects your company's true value and financial health.",
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/equity-explained-company-financial-health',
   }

@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, TrendingUp, DollarSign, BarChart3, Target, AlertCircle, Shield, FileText, Users, Package, Calculator } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'When to Hire a Bookkeeper for Your Small Business: Signs It's Time to Outsource',
+  title: "When to Hire a Bookkeeper for Your Small Business: Signs It's Time to Outsource",
   description: 'Identify indicators like time constraints or complex finances, with advice on finding a reliable bookkeeper and what to expect.',
   keywords: ['hire bookkeeper', 'outsource bookkeeping', 'bookkeeping services', 'when to hire accountant', 'bookkeeper vs DIY'],
   openGraph: {
-    title: 'When to Hire a Bookkeeper for Your Small Business: Signs It's Time to Outsource',
+    title: "When to Hire a Bookkeeper for Your Small Business: Signs It's Time to Outsource",
     description: 'Identify indicators like time constraints or complex finances, with advice on finding a reliable bookkeeper and what to expect.',
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/when-to-hire-a-bookkeeper-for-your-small-business-signs-its-time-to-outsource',

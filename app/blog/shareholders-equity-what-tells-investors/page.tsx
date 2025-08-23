@@ -3,12 +3,12 @@ import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, CheckCircle, Users, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Shareholders' Equity: What It Tells Investors About Your Company',
-  description: 'Understand how shareholders' equity reflects company value and what it signals to investors and stakeholders.',
+  title: "Shareholders' Equity: What It Tells Investors About Your Company",
+  description: "Understand how shareholders' equity reflects company value and what it signals to investors and stakeholders.",
   keywords: ['shareholders equity analysis', 'equity valuation', 'book value', 'return on equity', 'equity investors'],
   openGraph: {
-    title: 'Shareholders' Equity: What It Tells Investors About Your Company',
-    description: 'Understand how shareholders' equity reflects company value and what it signals to investors and stakeholders.',
+    title: "Shareholders' Equity: What It Tells Investors About Your Company",
+    description: "Understand how shareholders' equity reflects company value and what it signals to investors and stakeholders.",
     type: 'article',
     url: 'https://myaibookkeeper.com/blog/shareholders-equity-what-tells-investors',
   }

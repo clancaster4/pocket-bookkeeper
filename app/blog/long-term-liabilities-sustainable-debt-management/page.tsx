@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Calendar, CheckCircle, Calendar, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar, CheckCircle, DollarSign, TrendingUp, BarChart3, AlertCircle, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Long-Term Liabilities: Planning for Sustainable Debt Management',
